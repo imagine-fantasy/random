@@ -1,0 +1,68 @@
+import unittest
+from unittest.mock import patch, Mock
+from your_module import execute  # Replace 'your_module' with the actual module name
+
+class TestExecuteFunction(unittest.TestCase):
+
+    @patch('boto3.client')
+    @patch('os.getenv')
+    def test_execute_with_unprocessed_files(self, mock_getenv, mock_boto3):
+        # Set up mocks
+        mock_getenv.side_effect = ['bucket_name', 30]  # Return bucket name and delta time
+        mock_s3 = mock_boto3.return_value
+        mock_paginator = mock_s3.get_paginator.return_value
+        mock_pages = mock_paginator.paginate.return_value
+        mock_pages.__iter__.return_value = [
+            {'Contents': [
+                {'Key': 'input/file1.txt', 'LastModified': datetime.now(timezone.utc) - timedelta(minutes=31)},
+                {'Key': 'input/file2.txt', 'LastModified': datetime.now(timezone.utc) - timedelta(minutes=29)},
+            ]}
+        ]
+
+        # Call the execute function
+        execute(None, None)
+
+        # Assert logger messages
+        mock_logger = logging.getLogger()
+        mock_logger.info.assert_any_call('Received Event: unProcessedFiles')
+        mock_logger.info.assert_any_call('Unprocessed input file is present for more than 30 minutes: input/file1.txt')
+
+    @patch('boto3.client')
+    @patch('os.getenv')
+    def test_execute_without_unprocessed_files(self, mock_getenv, mock_boto3):
+        # Set up mocks
+        mock_getenv.side_effect = ['bucket_name', 30]  # Return bucket name and delta time
+        mock_s3 = mock_boto3.return_value
+        mock_paginator = mock_s3.get_paginator.return_value
+        mock_pages = mock_paginator.paginate.return_value
+        mock_pages.__iter__.return_value = [
+            {'Contents': [
+                {'Key': 'input/file1.txt', 'LastModified': datetime.now(timezone.utc) - timedelta(minutes=29)},
+            ]}
+        ]
+
+        # Call the execute function
+        execute(None, None)
+
+        # Assert logger messages
+        mock_logger = logging.getLogger()
+        mock_logger.info.assert_any_call('Received Event: unProcessedFiles')
+        mock_logger.info.assert_any_call('No or more unprocessed files present in s3 folder - entity/input folder')
+
+    @patch('boto3.client')
+    @patch('os.getenv')
+    def test_execute_with_exception(self, mock_getenv, mock_boto3):
+        # Set up mocks
+        mock_getenv.side_effect = ['bucket_name', 30]  # Return bucket name and delta time
+        mock_s3 = mock_boto3.return_value
+        mock_s3.get_paginator.side_effect = Exception('Test exception')
+
+        # Call the execute function
+        with self.assertRaises(Exception) as cm:
+            execute(None, None)
+
+        # Assert exception message
+        self.assertEqual(str(cm.exception), 'Exception monitoring s3 bucket Exception: Test exception')
+
+if __name__ == '__main__':
+    unittest.main()
