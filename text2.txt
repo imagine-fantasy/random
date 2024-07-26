@@ -1,0 +1,98 @@
+import unittest
+from unittest.mock import patch, MagicMock
+from datetime import datetime, timedelta, timezone
+from your_module import execute  # Replace 'your_module' with the actual module name
+
+class TestS3Monitor(unittest.TestCase):
+
+    @patch('your_module.boto3.client')
+    @patch('your_module.os.getenv')
+    def test_execute_unprocessed_files(self, mock_getenv, mock_boto3_client):
+        # Mock environment variables
+        mock_getenv.side_effect = lambda x: {'BUCKET_NAME': 'test-bucket', 'DELTA_TIME': '30'}[x]
+
+        # Mock S3 client and paginator
+        mock_s3 = MagicMock()
+        mock_boto3_client.return_value = mock_s3
+        mock_paginator = MagicMock()
+        mock_s3.get_paginator.return_value = mock_paginator
+
+        # Mock paginate results
+        current_time = datetime.now(timezone.utc)
+        old_file_time = current_time - timedelta(minutes=31)
+        mock_paginator.paginate.return_value = [
+            {
+                'Contents': [
+                    {
+                        'Key': 'vrtierd_entitlement/input/file1.txt',
+                        'LastModified': old_file_time
+                    },
+                    {
+                        'Key': 'vrtierd_entitlement/input/file2.txt',
+                        'LastModified': current_time
+                    }
+                ]
+            }
+        ]
+
+        # Call the function
+        with self.assertLogs() as log:
+            execute({}, {})
+
+        # Assert logs
+        self.assertIn("Unprocessed input file is present for more than 30 minutes", log.output[0])
+        self.assertIn("vrtierd_entitlement/input/file1.txt", log.output[0])
+        self.assertIn("One or more unprocessed files present in s3 folder - entitlement input folder", log.output[1])
+
+    @patch('your_module.boto3.client')
+    @patch('your_module.os.getenv')
+    def test_execute_no_unprocessed_files(self, mock_getenv, mock_boto3_client):
+        # Mock environment variables
+        mock_getenv.side_effect = lambda x: {'BUCKET_NAME': 'test-bucket', 'DELTA_TIME': '30'}[x]
+
+        # Mock S3 client and paginator
+        mock_s3 = MagicMock()
+        mock_boto3_client.return_value = mock_s3
+        mock_paginator = MagicMock()
+        mock_s3.get_paginator.return_value = mock_paginator
+
+        # Mock paginate results with no old files
+        current_time = datetime.now(timezone.utc)
+        mock_paginator.paginate.return_value = [
+            {
+                'Contents': [
+                    {
+                        'Key': 'vrtierd_entitlement/input/file1.txt',
+                        'LastModified': current_time
+                    }
+                ]
+            }
+        ]
+
+        # Call the function
+        with self.assertLogs() as log:
+            execute({}, {})
+
+        # Assert logs
+        self.assertNotIn("Unprocessed input file is present", "".join(log.output))
+        self.assertNotIn("One or more unprocessed files present", "".join(log.output))
+
+    @patch('your_module.boto3.client')
+    @patch('your_module.os.getenv')
+    def test_execute_exception(self, mock_getenv, mock_boto3_client):
+        # Mock environment variables
+        mock_getenv.side_effect = lambda x: {'BUCKET_NAME': 'test-bucket', 'DELTA_TIME': '30'}[x]
+
+        # Mock S3 client to raise an exception
+        mock_s3 = MagicMock()
+        mock_boto3_client.return_value = mock_s3
+        mock_s3.get_paginator.side_effect = Exception("Test exception")
+
+        # Call the function and assert it raises an exception
+        with self.assertRaises(Exception) as context:
+            execute({}, {})
+
+        self.assertIn("Exception monitoring s3 bucket", str(context.exception))
+
+if __name__ == '__main__':
+    unittest.main()
