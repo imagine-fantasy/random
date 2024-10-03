@@ -1,0 +1,43 @@
+C:\project\com\company\cardissuance
+│
+├───api
+│   ├───controller
+│   │       CardController.java
+│   │
+│   └───dto
+│           CardIssuanceRequest.java
+│
+├───config
+│       ValidationConfig.java
+│
+├───exception
+│       BusinessValidationException.java
+│       GlobalExceptionHandler.java
+│
+├───model
+│   └───entity
+│           Card.java
+│
+├───repository
+│       CardRepository.java
+│
+├───service
+│   │   CardIssuanceService.java
+│   │   SanctionService.java
+│   │
+│   └───impl
+│           CardIssuanceServiceImpl.java
+│           SanctionServiceImpl.java
+│
+├───util
+│       ValidationResult.java
+│
+└───validation
+    │   BusinessValidator.java
+    │   BusinessValidatorChain.java
+    │
+    └───validator
+            AgeValidator.java
+            CreditScoreValidator.java
+            IncomeValidator.java
+            SanctionValidator.java
