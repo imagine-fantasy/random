@@ -1,0 +1,27 @@
+-- Insert sample data into cardholders table
+INSERT INTO cc_cards.cardholders (first_name, last_name, email, company, credit_limit, created_at)
+VALUES 
+    ('John', 'Doe', 'john.doe@example.com', 'Acme Corp', 10000.00, CURRENT_TIMESTAMP),
+    ('Jane', 'Smith', 'jane.smith@example.com', 'Tech Innovators', 15000.00, CURRENT_TIMESTAMP);
+
+-- Insert sample data into card_creations table
+INSERT INTO cc_cards.card_creations (cardholder_id, request_date, processor_response, status)
+VALUES 
+    (
+        (SELECT id FROM cc_cards.cardholders WHERE email = 'john.doe@example.com'),
+        CURRENT_TIMESTAMP,
+        '{"approval_code": "ABC123", "card_number": "************1234", "expiration_date": "12/25", "cvv": "***"}',
+        'APPROVED'
+    ),
+    (
+        (SELECT id FROM cc_cards.cardholders WHERE email = 'jane.smith@example.com'),
+        CURRENT_TIMESTAMP,
+        '{"approval_code": "XYZ789", "card_number": "************5678", "expiration_date": "03/26", "cvv": "***"}',
+        'APPROVED'
+    ),
+    (
+        (SELECT id FROM cc_cards.cardholders WHERE email = 'john.doe@example.com'),
+        CURRENT_TIMESTAMP - INTERVAL '1 day',
+        '{"error_code": "E001", "error_message": "Insufficient credit score"}',
+        'DECLINED'
+    );
