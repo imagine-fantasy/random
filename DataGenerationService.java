@@ -86,4 +86,27 @@ public class DataGenerationService {
         return String.format("{\"card_number\": \"%s\", \"expiration_date\": \"%s\", \"cvv\": \"%s\", \"approval_code\": \"%s\"}",
                 cardNumber, expirationDate, cvv, approvalCode);
     }
+
+     public List<Cardholder> getAllCardholders() {
+        return cardholderRepository.findAll();
+    }
+
+    public List<CardCreation> getAllCardCreations() {
+        return cardCreationRepository.findAll();
+    }
+
+    public long getCardholderCount() {
+        return cardholderRepository.count();
+    }
+
+    public long getCardCreationCount() {
+        return cardCreationRepository.count();
+    }
+
+    // Helper method to get counts of both entities
+    public String getDataCounts() {
+        long cardholderCount = getCardholderCount();
+        long cardCreationCount = getCardCreationCount();
+        return String.format("Cardholders: %d, Card Creations: %d", cardholderCount, cardCreationCount);
+    }
 }
