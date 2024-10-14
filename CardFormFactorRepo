@@ -1,0 +1,15 @@
+package com.yourcompany.ccards.repository;
+
+import com.yourcompany.ccards.model.CardFormFactor;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.UUID;
+
+@Repository
+public interface CardFormFactorRepository extends JpaRepository<CardFormFactor, UUID> {
+    // Basic CRUD operations are provided by JpaRepository
+    
+    // You can add custom query methods here if needed, for example:
+    // List<CardFormFactor> findByCardCreationId(UUID cardCreationId);
+}
