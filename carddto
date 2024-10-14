@@ -1,0 +1,11 @@
+public class CardCreationRequestDTO {
+    private String firstName;
+    private String lastName;
+    private String email;
+    private String company;
+    private BigDecimal creditLimit;
+    private String cardTemplateId;
+    private List<String> formFactors;
+
+    // Getters and setters
+}
