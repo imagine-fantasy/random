@@ -1,0 +1,67 @@
+@Service
+public class SimplifiedCardService {
+
+    private final CardholderRepository cardholderRepository;
+    private final CardCreationRepository cardCreationRepository;
+    private final CardFormFactorRepository cardFormFactorRepository;
+    private final UniqueCardNumberGenerator cardNumberGenerator;
+    private final Faker faker = new Faker();
+
+    public SimplifiedCardService(CardholderRepository cardholderRepository,
+                                 CardCreationRepository cardCreationRepository,
+                                 CardFormFactorRepository cardFormFactorRepository,
+                                 UniqueCardNumberGenerator cardNumberGenerator) {
+        this.cardholderRepository = cardholderRepository;
+        this.cardCreationRepository = cardCreationRepository;
+        this.cardFormFactorRepository = cardFormFactorRepository;
+        this.cardNumberGenerator = cardNumberGenerator;
+    }
+
+    @Transactional
+    public String createCard(CardCreationRequestDTO request) {
+        Cardholder cardholder = createCardholder(request);
+        cardholderRepository.save(cardholder);
+
+        CardCreation cardCreation = createCardCreation(cardholder, request);
+        cardCreationRepository.save(cardCreation);
+
+        saveCardFormFactors(cardCreation, request.getFormFactors());
+
+        return cardCreation.getCardNumber();
+    }
+
+    private Cardholder createCardholder(CardCreationRequestDTO request) {
+        Cardholder cardholder = new Cardholder();
+        cardholder.setFirstName(request.getFirstName());
+        cardholder.setLastName(request.getLastName());
+        cardholder.setEmail(request.getEmail());
+        cardholder.setCompany(request.getCompany());
+        cardholder.setCreditLimit(request.getCreditLimit());
+        cardholder.setCreatedAt(OffsetDateTime.now());
+        return cardholder;
+    }
+
+    private CardCreation createCardCreation(Cardholder cardholder, CardCreationRequestDTO request) {
+        CardCreation cardCreation = new CardCreation();
+        cardCreation.setCardholder(cardholder);
+        cardCreation.setRequestDate(OffsetDateTime.now());
+        cardCreation.setProcessorResponse(generateProcessorResponse(request.getCardTemplateId()));
+        cardCreation.setStatus("APPROVED");
+        cardCreation.setCardNumber(cardNumberGenerator.generateUniqueCardNumber());
+        return cardCreation;
+    }
+
+    private void saveCardFormFactors(CardCreation cardCreation, List<String> formFactors) {
+        for (String formFactor : formFactors) {
+            CardFormFactor cardFormFactor = new CardFormFactor();
+            cardFormFactor.setCardCreation(cardCreation);
+            cardFormFactor.setFormFactor(formFactor);
+            cardFormFactorRepository.save(cardFormFactor);
+        }
+    }
+
+    private String generateProcessorResponse(String cardTemplateId) {
+        String approvalCode = faker.number().digits(6);
+        return String.format("{\"approval_code\": \"%s\", \"card_template_id\": \"%s\"}", approvalCode, cardTemplateId);
+    }
+}
