@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS card_creations (
     request_date TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     processor_response JSONB NOT NULL,
     status VARCHAR(20) NOT NULL,
-    card_number VARCHAR(16) NOT NULL,
+    card_number VARCHAR(16) NOT NULL UNIQUE,
     FOREIGN KEY (cardholder_id) REFERENCES cardholders(id)
 );
 
@@ -37,5 +37,5 @@ CREATE TABLE IF NOT EXISTS card_form_factors (
 -- Create indexes
 CREATE INDEX IF NOT EXISTS idx_cardholders_email ON cardholders(email);
 CREATE INDEX IF NOT EXISTS idx_card_creations_cardholder_id ON card_creations(cardholder_id);
-CREATE INDEX IF NOT EXISTS idx_card_creations_card_number ON card_creations(card_number);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_card_creations_card_number ON card_creations(card_number);
 CREATE INDEX IF NOT EXISTS idx_card_form_factors_card_creation_id ON card_form_factors(card_creation_id);
