@@ -1,0 +1,21 @@
+-- Insert sample data into cardholders table
+INSERT INTO cc_cards.cardholders (first_name, last_name, email, company, credit_limit, created_at)
+VALUES 
+    ('John', 'Doe', 'john.doe@example.com', 'Acme Corp', 10000.00, CURRENT_TIMESTAMP),
+    ('Jane', 'Smith', 'jane.smith@example.com', 'Tech Innovators', 15000.00, CURRENT_TIMESTAMP),
+    ('Alice', 'Johnson', 'alice.johnson@example.com', 'Global Services', 12000.00, CURRENT_TIMESTAMP);
+
+-- Insert sample data into card_creations table
+INSERT INTO cc_cards.card_creations (cardholder_id, request_date, processor_response, status, card_number)
+VALUES 
+    ((SELECT id FROM cc_cards.cardholders WHERE email = 'john.doe@example.com'), CURRENT_TIMESTAMP, '{"approval_code": "ABC123", "card_template_id": "TEMPLATE_001"}', 'APPROVED', '4111111111111111'),
+    ((SELECT id FROM cc_cards.cardholders WHERE email = 'jane.smith@example.com'), CURRENT_TIMESTAMP, '{"approval_code": "DEF456", "card_template_id": "TEMPLATE_002"}', 'APPROVED', '4222222222222222'),
+    ((SELECT id FROM cc_cards.cardholders WHERE email = 'alice.johnson@example.com'), CURRENT_TIMESTAMP, '{"approval_code": "GHI789", "card_template_id": "TEMPLATE_001"}', 'APPROVED', '4333333333333333');
+
+-- Insert sample data into card_form_factors table
+INSERT INTO cc_cards.card_form_factors (card_creation_id, form_factor)
+VALUES 
+    ((SELECT id FROM cc_cards.card_creations WHERE card_number = '4111111111111111'), 'DIGITAL'),
+    ((SELECT id FROM cc_cards.card_creations WHERE card_number = '4111111111111111'), 'EMBOSSED'),
+    ((SELECT id FROM cc_cards.card_creations WHERE card_number = '4222222222222222'), 'DIGITAL'),
+    ((SELECT id FROM cc_cards.card_creations WHERE card_number = '4333333333333333'), 'EMBOSSED');
