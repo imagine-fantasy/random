@@ -1,0 +1,13 @@
+@Component
+public class UniqueCardNumberGenerator {
+    private final Set<String> usedCardNumbers = Collections.synchronizedSet(new HashSet<>());
+    private final Faker faker = new Faker();
+
+    public String generateUniqueCardNumber() {
+        String cardNumber;
+        do {
+            cardNumber = faker.finance().creditCard().replaceAll("-", "");
+        } while (!usedCardNumbers.add(cardNumber));
+        return cardNumber;
+    }
+}
