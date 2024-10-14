@@ -1,0 +1,29 @@
+@Entity
+@Table(name = "card_creations", schema = "cc_cards")
+public class CardCreation {
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private UUID id;
+
+    @ManyToOne
+    @JoinColumn(name = "cardholder_id", nullable = false)
+    private Cardholder cardholder;
+
+    @Column(name = "request_date", nullable = false)
+    private OffsetDateTime requestDate;
+
+    @Column(name = "processor_response", nullable = false, columnDefinition = "jsonb")
+    private String processorResponse;
+
+    @Column(nullable = false)
+    private String status;
+
+    @Column(name = "card_number", nullable = false, unique = true)
+    private String cardNumber;
+
+    @OneToMany(mappedBy = "cardCreation", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CardFormFactor> formFactors = new ArrayList<>();
+
+    // Getters and setters
+    // ... (other methods remain the same)
+}
