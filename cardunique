@@ -1,0 +1,25 @@
+@Service
+public class CardService {
+    private final CardholderRepository cardholderRepository;
+    private final CardCreationRepository cardCreationRepository;
+    private final UniqueCardNumberGenerator cardNumberGenerator;
+    private final Faker faker = new Faker();
+
+    public CardService(CardholderRepository cardholderRepository,
+                       CardCreationRepository cardCreationRepository,
+                       UniqueCardNumberGenerator cardNumberGenerator) {
+        this.cardholderRepository = cardholderRepository;
+        this.cardCreationRepository = cardCreationRepository;
+        this.cardNumberGenerator = cardNumberGenerator;
+    }
+
+    // ... other methods ...
+
+    private CardCreation createCardCreation(Cardholder cardholder, CardCreationRequestDTO request) {
+        CardCreation cardCreation = new CardCreation();
+        // ... other fields ...
+        cardCreation.setCardNumber(cardNumberGenerator.generateUniqueCardNumber());
+        // ... rest of the method ...
+        return cardCreation;
+    }
+}
