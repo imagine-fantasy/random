@@ -15,31 +15,27 @@ CREATE TABLE IF NOT EXISTS cardholders (
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
--- Create the form_factors table
-CREATE TABLE IF NOT EXISTS form_factors (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    name VARCHAR(20) NOT NULL UNIQUE
-);
-
--- Insert default form factors
-INSERT INTO form_factors (name) VALUES ('DIGITAL'), ('EMBOSSED');
-
 -- Create the card_creations table
 CREATE TABLE IF NOT EXISTS card_creations (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     cardholder_id UUID NOT NULL,
-    form_factor_id UUID NOT NULL,
     request_date TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     processor_response JSONB NOT NULL,
     status VARCHAR(20) NOT NULL,
     card_number VARCHAR(16) NOT NULL,
-    FOREIGN KEY (cardholder_id) REFERENCES cardholders(id),
-    FOREIGN KEY (form_factor_id) REFERENCES form_factors(id)
+    FOREIGN KEY (cardholder_id) REFERENCES cardholders(id)
+);
+
+-- Create the card_form_factors table
+CREATE TABLE IF NOT EXISTS card_form_factors (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    card_creation_id UUID NOT NULL,
+    form_factor VARCHAR(20) NOT NULL,
+    FOREIGN KEY (card_creation_id) REFERENCES card_creations(id)
 );
 
 -- Create indexes
 CREATE INDEX IF NOT EXISTS idx_cardholders_email ON cardholders(email);
 CREATE INDEX IF NOT EXISTS idx_card_creations_cardholder_id ON card_creations(cardholder_id);
-CREATE INDEX IF NOT EXISTS idx_card_creations_form_factor_id ON card_creations(form_factor_id);
-CREATE INDEX IF NOT EXISTS idx_card_creations_status ON card_creations(status);
 CREATE INDEX IF NOT EXISTS idx_card_creations_card_number ON card_creations(card_number);
+CREATE INDEX IF NOT EXISTS idx_card_form_factors_card_creation_id ON card_form_factors(card_creation_id);
