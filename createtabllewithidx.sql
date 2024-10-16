@@ -27,9 +27,13 @@ CREATE INDEX IF NOT EXISTS idx_card_creations_cardholder_id ON cc_cards.card_cre
 CREATE INDEX IF NOT EXISTS idx_card_creations_card_number ON cc_cards.card_creations(card_number);
 CREATE INDEX IF NOT EXISTS idx_card_creations_status ON cc_cards.card_creations(status);
 
--- Create the card_form_factors table
 CREATE TABLE IF NOT EXISTS cc_cards.card_form_factors (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     card_creation_id UUID NOT NULL,
     form_factor VARCHAR(20) NOT NULL,
-    FOREIGN KEY (card_creation_id) REFERENCES cc_cards.card_crea
+    FOREIGN KEY (card_creation_id) REFERENCES cc_cards.card_creations(id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_card_form_factors_card_creation_id ON cc_cards.card_form_factors(card_creation_id);
+
+    
