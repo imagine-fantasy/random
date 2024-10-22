@@ -1,0 +1,36 @@
+ @OneToMany(mappedBy = "cardholder", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CardCreation> cardCreations = new ArrayList<>();
+
+    // ... other getters and setters ...
+
+    public void addCardCreation(CardCreation cardCreation) {
+        cardCreations.add(cardCreation);
+        cardCreation.setCardholder(this);
+    }
+
+    public void removeCardCreation(CardCreation cardCreation) {
+        cardCreations.remove(cardCreation);
+        cardCreation.setCardholder(null);
+    }
+
+
+ @ManyToOne
+    @JoinColumn(name = "cardholder_id", nullable = false)
+    private Cardholder cardholder;
+
+    @OneToMany(mappedBy = "cardCreation", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CardFormFactor> formFactors = new ArrayList<>();
+
+    // ... other fields and getters/setters ...
+
+    public void addFormFactor(CardFormFactor formFactor) {
+        formFactors.add(formFactor);
+        formFactor.setCardCreation(this);
+    }
+
+    public void removeFormFactor(CardFormFactor formFactor) {
+        formFactors.remove(formFactor);
+        formFactor.setCardCreation(null);
+    }
+
+
