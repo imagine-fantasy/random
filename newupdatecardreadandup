@@ -1,0 +1,41 @@
+@Service
+public class SimplifiedCardService {
+
+    private final CardholderRepository cardholderRepository;
+    private final CardCreationRepository cardCreationRepository;
+    private final UniqueCardNumberGenerator cardNumberGenerator;
+    private final Random random = new Random();
+
+    // Constructor remains the same...
+
+    public List<CardInfo> getCardInfo(String cardNumber) {
+        List<CardCreation> cardCreations = cardCreationRepository.findByCardNumber(cardNumber);
+        if (cardCreations.isEmpty()) {
+            throw new RuntimeException("No cards found with number: " + cardNumber);
+        }
+        
+        return cardCreations.stream()
+            .map(cardCreation -> new CardInfo(
+                cardCreation.getCardNumber(),
+                cardCreation.getCardholder().getCreditLimit(),
+                cardCreation.getStatus(),
+                cardCreation.getCardholder().getId(),  // Added cardholder ID for reference
+                cardCreation.getId()                   // Added card creation ID for reference
+            ))
+            .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void updateCreditLimit(String cardNumber) {
+        List<CardCreation> cardCreations = cardCreationRepository.findByCardNumber(cardNumber);
+        if (cardCreations.isEmpty()) {
+            throw new RuntimeException("No cards found with number: " + cardNumber);
+        }
+
+        // Update credit limit for all cardholders with this card number
+        cardCreations.forEach(cardCreation -> {
+            BigDecimal newLimit = BigDecimal.valueOf(random.nextInt(40000) + 10000);
+            cardCreation.getCardholder().setCreditLimit(newLimit);
+        });
+    }
+}
