@@ -1,0 +1,30 @@
+@RestController
+@RequestMapping("/api/cards")
+public class CardController {
+
+    private final SimplifiedCardService cardService;
+
+    public CardController(SimplifiedCardService cardService) {
+        this.cardService = cardService;
+    }
+
+    @GetMapping("/{cardNumber}")
+    public ResponseEntity<List<CardInfo>> getCardInfo(@PathVariable String cardNumber) {
+        try {
+            List<CardInfo> cardInfos = cardService.getCardInfo(cardNumber);
+            return ResponseEntity.ok(cardInfos);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PutMapping("/{cardNumber}/credit-limit")
+    public ResponseEntity<String> updateCreditLimit(@PathVariable String cardNumber) {
+        try {
+            cardService.updateCreditLimit(cardNumber);
+            return ResponseEntity.ok("Credit limits updated successfully for card number: " + cardNumber);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+}
