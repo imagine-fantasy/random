@@ -1,0 +1,5 @@
+@EnableAutoConfiguration(exclude = {
+    DataSourceAutoConfiguration.class,
+    HibernateJpaAutoConfiguration.class,
+    DataSourceTransactionManagerAutoConfiguration.class
+})
