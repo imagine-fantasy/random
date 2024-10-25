@@ -1,18 +1,4 @@
--- Method 1: Check active connection settings
-SELECT * FROM [SHOW ALL SETTINGS] 
-WHERE variable LIKE '%connection%' OR variable LIKE '%idle%';
-
--- Method 2: Check specific connection pool settings for your application
--- For Go's database/sql driver
-SELECT 
-    active_connections,
-    max_connections,
-    total_connections,
-    connection_start_time,
-    EXTRACT(EPOCH FROM (NOW() - connection_start_time)) as connection_age_seconds
-FROM crdb_internal.node_connections;
-
--- Method 3: Check connection history
-SELECT * FROM crdb_internal.connection_history
-ORDER BY start_time DESC
-LIMIT 10;
+SHOW CLUSTER SETTINGS WHERE variable LIKE '%timeout%' 
+   OR variable LIKE '%connection%' 
+   OR variable LIKE '%pool%'
+   OR variable LIKE '%max%';
