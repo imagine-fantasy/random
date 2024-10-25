@@ -1,0 +1,18 @@
+public class CardInfo {
+    private String cardNumber;
+    private BigDecimal creditLimit;
+    private String status;
+    private UUID cardholderId;    // Added to differentiate between cards
+    private UUID cardCreationId;  // Added to differentiate between cards
+
+    public CardInfo(String cardNumber, BigDecimal creditLimit, String status, 
+                   UUID cardholderId, UUID cardCreationId) {
+        this.cardNumber = cardNumber;
+        this.creditLimit = creditLimit;
+        this.status = status;
+        this.cardholderId = cardholderId;
+        this.cardCreationId = cardCreationId;
+    }
+
+    // Getters and setters
+}
