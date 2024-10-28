@@ -1,12 +1,15 @@
--- Set lease holder preferences for all tables
-ALTER TABLE cc_cards.cardholders CONFIGURE ZONE USING lease_preferences = '[[+region=us-east-1]]';
-ALTER TABLE cc_cards.card_creations CONFIGURE ZONE USING lease_preferences = '[[+region=us-east-1]]';
-ALTER TABLE cc_cards.card_form_factors CONFIGURE ZONE USING lease_preferences = '[[+region=us-east-1]]';
+-- Set configurations with us-east-1 lease preference
+ALTER TABLE cc_cards.cardholders CONFIGURE ZONE USING 
+    constraints = '[[+region=us-east-1], [+region=us-east-2], [+region=us-west-2]]',
+    lease_preferences = '[[+region=us-east-1]]';
 
--- Remove lease holder preferences
-ALTER TABLE cc_cards.cardholders CONFIGURE ZONE USING lease_preferences = NULL;
-ALTER TABLE cc_cards.card_creations CONFIGURE ZONE USING lease_preferences = NULL;
-ALTER TABLE cc_cards.card_form_factors CONFIGURE ZONE USING lease_preferences = NULL;
+ALTER TABLE cc_cards.card_creations CONFIGURE ZONE USING 
+    constraints = '[[+region=us-east-1], [+region=us-east-2], [+region=us-west-2]]',
+    lease_preferences = '[[+region=us-east-1]]';
+
+ALTER TABLE cc_cards.card_form_factors CONFIGURE ZONE USING 
+    constraints = '[[+region=us-east-1], [+region=us-east-2], [+region=us-west-2]]',
+    lease_preferences = '[[+region=us-east-1]]';
 
 -- To verify configurations
 SHOW ZONE CONFIGURATION FOR TABLE cc_cards.cardholders;
