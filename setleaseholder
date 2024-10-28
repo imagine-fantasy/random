@@ -1,0 +1,14 @@
+-- Set lease holder preferences for all tables
+ALTER TABLE cc_cards.cardholders SET LOCALITY PREFERRED 'us-east-1';
+ALTER TABLE cc_cards.card_creations SET LOCALITY PREFERRED 'us-east-1';
+ALTER TABLE cc_cards.card_form_factors SET LOCALITY PREFERRED 'us-east-1';
+
+-- Remove lease holder preferences
+ALTER TABLE cc_cards.cardholders SET LOCALITY PREFERRED NULL;
+ALTER TABLE cc_cards.card_creations SET LOCALITY PREFERRED NULL;
+ALTER TABLE cc_cards.card_form_factors SET LOCALITY PREFERRED NULL;
+
+-- To verify lease holder locations (these are useful diagnostic queries)
+SHOW RANGES FROM TABLE cc_cards.cardholders;
+SHOW RANGES FROM TABLE cc_cards.card_creations;
+SHOW RANGES FROM TABLE cc_cards.card_form_factors;
