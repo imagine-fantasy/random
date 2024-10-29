@@ -1,0 +1,12 @@
+@Repository
+public interface CardFormFactorRepository extends JpaRepository<CardFormFactor, UUID> {
+    // Custom delete query - deletes form factor for a specific card number
+    @Modifying
+    @Query("DELETE FROM CardFormFactor cf WHERE cf.cardCreation.cardNumber = :cardNumber AND cf.formFactor = :formFactor")
+    void deleteByCardNumberAndFormFactor(@Param("cardNumber") String cardNumber, @Param("formFactor") String formFactor);
+}
+
+
+  @Modifying
+    @Query("DELETE FROM CardFormFactor cf WHERE cf.cardCreation.cardNumber = :cardNumber AND cf.formFactor = 'PLASTIC'")
+    void deletePlasticByCardNumber(@Param("cardNumber") String cardNumber);
