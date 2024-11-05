@@ -1,0 +1,135 @@
+@Data
+@ConfigurationProperties(prefix = "validation")
+@Configuration
+public class ValidationProperties {
+    private Map<String, ConstraintGroup> constraints;
+    private Map<String, String> constraintMappings;
+
+    @Data
+    public static class ConstraintGroup {
+        private ConstraintConfig min;
+        private ConstraintConfig max;
+        private ConstraintConfig range;
+        private ConstraintConfig pattern;
+        private ConstraintConfig badValue;
+        private ConstraintConfig default;
+    }
+
+    @Data
+    public static class ConstraintConfig {
+        private String code;
+        private String messageKey;
+    }
+}
+
+@Service
+@RequiredArgsConstructor
+public class ValidationErrorMapper {
+    private final ValidationProperties properties;
+    private final MessageSource messageSource;
+
+    public ValidationError mapError(FieldError fieldError, Locale locale) {
+        String constraintType = determineConstraintType(fieldError);
+        ConstraintConfig config = getConstraintConfig(constraintType);
+        
+        return new ValidationError(
+            config.getCode(),
+            resolveMessage(config.getMessageKey(), fieldError, locale),
+            fieldError.getField()
+        );
+    }
+
+    private String determineConstraintType(FieldError fieldError) {
+        return Arrays.stream(fieldError.getCodes())
+            .map(this::extractConstraintMapping)
+            .filter(Objects::nonNull)
+            .findFirst()
+            .orElse("default");
+    }
+
+    private String extractConstraintMapping(String code) {
+        String annotationKey = code.contains(".") 
+            ? code.substring(0, code.indexOf("."))
+            : code;
+            
+        // Check if this is a min/max constraint
+        String constraint = "";
+        if (code.contains(".min.")) {
+            constraint = "$min";
+        } else if (code.contains(".max.")) {
+            constraint = "$max";
+        }
+        
+        return properties.getConstraintMappings().get(
+            "jakarta.validation.constraints." + annotationKey + constraint
+        );
+    }
+
+    private ConstraintConfig getConstraintConfig(String constraintType) {
+        String[] parts = constraintType.split("\\.");
+        if (parts.length != 2) {
+            return properties.getConstraints().get("default").getDefault();
+        }
+
+        ConstraintGroup group = properties.getConstraints().get(parts[0]);
+        return switch(parts[1]) {
+            case "min" -> group.getMin();
+            case "max" -> group.getMax();
+            case "range" -> group.getRange();
+            case "pattern" -> group.getPattern();
+            case "bad-value" -> group.getBadValue();
+            default -> properties.getConstraints().get("default").getDefault();
+        };
+    }
+
+    private String resolveMessage(String messageKey, FieldError fieldError, Locale locale) {
+        Object[] args = extractMessageArguments(fieldError);
+        return messageSource.getMessage(messageKey, args, locale);
+    }
+
+    private Object[] extractMessageArguments(FieldError fieldError) {
+        return Optional.ofNullable(fieldError.getArguments())
+            .map(args -> Arrays.stream(args)
+                .filter(arg -> arg instanceof DefaultMessageSourceResolvable)
+                .map(arg -> ((DefaultMessageSourceResolvable) arg).getArguments())
+                .findFirst()
+                .orElse(new Object[0]))
+            .orElse(new Object[0]);
+    }
+}
+
+@RestControllerAdvice
+@RequiredArgsConstructor
+public class ValidationExceptionHandler {
+    private final ValidationErrorMapper errorMapper;
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ValidationErrorResponse> handleValidationException(
+            MethodArgumentNotValidException ex,
+            Locale locale) {
+        
+        List<ValidationError> errors = ex.getBindingResult()
+            .getFieldErrors()
+            .stream()
+            .map(error -> errorMapper.mapError(error, locale))
+            .collect(Collectors.toList());
+
+        return ResponseEntity
+            .status(HttpStatus.BAD_REQUEST)
+            .body(new ValidationErrorResponse(errors));
+    }
+}
+
+@Data
+@AllArgsConstructor
+public class ValidationErrorResponse {
+    private List<ValidationError> errors;
+}
+
+@Data
+@AllArgsConstructor
+public class ValidationError {
+    private String code;
+    private String message;
+    private String field;
+}
