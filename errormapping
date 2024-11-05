@@ -1,0 +1,147 @@
+@Data
+@ConfigurationProperties(prefix = "validation")
+@Configuration
+public class ValidationProperties {
+    private Map<String, ValidationConstraintConfig> constraints;
+    
+    @Data
+    public static class ValidationConstraintConfig {
+        private String code;
+        private String messageKey;
+        private List<String> annotations;
+    }
+}
+
+@Service
+@RequiredArgsConstructor
+public class ValidationMessageResolver {
+    private final MessageSource messageSource;
+    
+    private static final Map<Class<?>, Function<Object, Object[]>> ARGUMENT_EXTRACTORS = Map.of(
+        DefaultMessageSourceResolvable.class, arg -> ((DefaultMessageSourceResolvable) arg).getArguments(),
+        ConstraintViolation.class, arg -> new Object[]{((ConstraintViolation<?>) arg).getInvalidValue()},
+        // Add more extractors as needed
+        Object.class, arg -> new Object[]{arg}
+    );
+    
+    public String resolveMessage(String messageKey, Object[] arguments, Locale locale) {
+        Object[] extractedArgs = Arrays.stream(arguments)
+            .map(this::extractArguments)
+            .flatMap(Arrays::stream)
+            .toArray();
+            
+        return messageSource.getMessage(messageKey, extractedArgs, locale);
+    }
+    
+    private Object[] extractArguments(Object arg) {
+        return ARGUMENT_EXTRACTORS.entrySet().stream()
+            .filter(entry -> entry.getKey().isInstance(arg))
+            .findFirst()
+            .map(entry -> entry.getValue().apply(arg))
+            .orElse(new Object[]{arg});
+    }
+}
+
+@Service
+@RequiredArgsConstructor
+public class ValidationConstraintMapper {
+    private final ValidationProperties properties;
+    
+    private Map<String, ValidationConstraintConfig> annotationToConfig;
+    
+    @PostConstruct
+    public void init() {
+        annotationToConfig = properties.getConstraints().values().stream()
+            .flatMap(config -> config.getAnnotations().stream()
+                .map(annotation -> Map.entry(annotation, config)))
+            .collect(Collectors.toMap(
+                Map.Entry::getKey,
+                Map.Entry::getValue,
+                (existing, replacement) -> existing
+            ));
+    }
+    
+    public ValidationConstraintConfig getConfigForError(FieldError error) {
+        return Arrays.stream(error.getCodes())
+            .map(this::normalizeCode)
+            .map(annotationToConfig::get)
+            .filter(Objects::nonNull)
+            .findFirst()
+            .orElse(properties.getConstraints().get("default"));
+    }
+    
+    private String normalizeCode(String code) {
+        return String.format(
+            "jakarta.validation.constraints.%s",
+            code.split("\\.")[0]
+        );
+    }
+}
+
+// Assuming this is your OAS-generated error response structure
+// Please replace with your actual structure
+@Data
+@Builder
+public class ApiErrorResponse {
+    private String type;
+    private String title;
+    private int status;
+    private String detail;
+    private String instance;
+    private List<ValidationErrorDetail> errors;
+    
+    @Data
+    @Builder
+    public static class ValidationErrorDetail {
+        private String field;
+        private String code;
+        private String message;
+    }
+}
+
+@RestControllerAdvice
+@RequiredArgsConstructor
+public class ValidationExceptionHandler {
+    private final ValidationConstraintMapper constraintMapper;
+    private final ValidationMessageResolver messageResolver;
+    
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiErrorResponse> handleValidationException(
+            MethodArgumentNotValidException ex,
+            WebRequest request,
+            Locale locale) {
+        
+        List<ValidationErrorDetail> errors = ex.getBindingResult()
+            .getFieldErrors()
+            .stream()
+            .map(error -> mapToErrorDetail(error, locale))
+            .collect(Collectors.toList());
+            
+        ApiErrorResponse response = ApiErrorResponse.builder()
+            .type("validation-error")
+            .title("Validation Failed")
+            .status(HttpStatus.BAD_REQUEST.value())
+            .detail("One or more fields failed validation")
+            .instance(((ServletWebRequest) request).getRequest().getRequestURI())
+            .errors(errors)
+            .build();
+            
+        return ResponseEntity
+            .status(HttpStatus.BAD_REQUEST)
+            .body(response);
+    }
+    
+    private ValidationErrorDetail mapToErrorDetail(FieldError error, Locale locale) {
+        ValidationConstraintConfig config = constraintMapper.getConfigForError(error);
+        
+        return ValidationErrorDetail.builder()
+            .field(error.getField())
+            .code(config.getCode())
+            .message(messageResolver.resolveMessage(
+                config.getMessageKey(),
+                error.getArguments(),
+                locale
+            ))
+            .build();
+    }
+}
