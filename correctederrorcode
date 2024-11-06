@@ -1,0 +1,57 @@
+// src/main/java/com/example/validation/registry/ConstraintHandlerRegistry.java
+@Component
+public class ConstraintHandlerRegistry {
+    private final Map<String, ConstraintTypeResolver> resolvers;
+
+    public ConstraintHandlerRegistry() {
+        this.resolvers = new HashMap<>();
+        initializeResolvers();
+    }
+
+    private void initializeResolvers() {
+        // Size/Length constraints
+        resolvers.put("Size", error -> {
+            ValidationResult result = ValidationUtils.compareValue(
+                error.getRejectedValue().toString().length(),
+                (int) error.getArguments()[2]
+            );
+            // Return "Size.min" or "Size.max" instead of "min-length" or "max-length"
+            return error.getCode() + "." + result.name().toLowerCase();
+        });
+
+        // Similar for Length
+        resolvers.put("Length", error -> {
+            ValidationResult result = ValidationUtils.compareValue(
+                error.getRejectedValue().toString().length(),
+                (int) error.getArguments()[2]
+            );
+            return error.getCode() + "." + result.name().toLowerCase();
+        });
+
+        // Range should now return the exact constraint type
+        resolvers.put("Range", error -> "Range");
+
+        // Direct mappings - these are already correct
+        Map<String, String> directMappings = Map.of(
+            "DecimalMin", "DecimalMin",
+            "DecimalMax", "DecimalMax",
+            "Digits", "Digits",
+            "Pattern", "Pattern",
+            "Email", "Email",
+            "NotNull", "NotNull",
+            "NotEmpty", "NotEmpty",
+            "NotBlank", "NotBlank",
+            "ValueOfEnum", "ValueOfEnum"
+        );
+        
+        directMappings.forEach((key, value) -> 
+            resolvers.put(key, error -> value));
+    }
+
+    public String resolveConstraintType(FieldError error) {
+        return Optional.ofNullable(error.getCode())
+                .map(resolvers::get)
+                .map(resolver -> resolver.resolveType(error))
+                .orElse("default");
+    }
+}
