@@ -1,0 +1,30 @@
+package com.yourcompany.project.config;
+
+import org.springframework.context.MessageSource;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.support.ReloadableResourceBundleMessageSource;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+
+@Configuration
+@EnableConfigurationProperties(ValidationProperties.class)
+public class ValidationConfig {
+    
+    @Bean
+    public MessageSource messageSource() {
+        ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
+        // Make sure this path matches where you put your messages.properties file
+        messageSource.setBasename("classpath:messages/messages");
+        messageSource.setDefaultEncoding("UTF-8");
+        messageSource.setUseCodeAsDefaultMessage(true); // This will return the message key if message is not found
+        return messageSource;
+    }
+
+    @Bean
+    public LocalValidatorFactoryBean getValidator(MessageSource messageSource) {
+        LocalValidatorFactoryBean bean = new LocalValidatorFactoryBean();
+        bean.setValidationMessageSource(messageSource);
+        return bean;
+    }
+}
