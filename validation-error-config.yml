@@ -1,0 +1,48 @@
+validation:
+  errors:
+    min-length:
+      code: "10001"
+      message-key: "validation.length.min"
+    max-length:
+      code: "10003"
+      message-key: "validation.length.max"
+    decimal-min:
+      code: "10100"
+      message-key: "validation.decimal.min"
+    decimal-max:
+      code: "10101"
+      message-key: "validation.decimal.max"
+    decimal-range:
+      code: "10102"
+      message-key: "validation.decimal.range"
+    pattern:
+      code: "10103"
+      message-key: "validation.format.pattern"
+    bad-value:
+      code: "10104"
+      message-key: "validation.format.bad-value"
+    default:
+      code: "10199"
+      message-key: "validation.default"
+      
+  constraint-mappings:
+    # Length validations
+    "Size.min": "min-length"
+    "Length.min": "min-length"
+    "Size.max": "max-length"
+    "Length.max": "max-length"
+    
+    # Decimal/Amount validations
+    "DecimalMin": "decimal-min"
+    "DecimalMax": "decimal-max"
+    "Range": "decimal-range"
+    "Digits": "decimal-range"
+    
+    # Format validations
+    "Pattern": "pattern"
+    
+    # Required field validations
+    "NotNull": "bad-value"
+    "NotEmpty": "bad-value"
+    "NotBlank": "bad-value"
+    "Email": "bad-value"
