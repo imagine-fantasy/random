@@ -1,0 +1,376 @@
+```plaintext
+src/
+├── main/
+│   ├── java/
+│   │   └── com/
+│   │       └── example/
+│   │           └── validation/
+│   │               ├── config/
+│   │               │   ├── ValidationConfig.java
+│   │               │   └── ValidationProperties.java
+│   │               ├── core/
+│   │               │   ├── ConstraintTypeResolver.java
+│   │               │   ├── MessageArgsBuilder.java
+│   │               │   └── ValidationResult.java
+│   │               ├── registry/
+│   │               │   ├── ConstraintHandlerRegistry.java
+│   │               │   └── MessageArgumentsRegistry.java
+│   │               ├── handler/
+│   │               │   ├── ValidationBoundaryHandler.java
+│   │               │   └── ValidationErrorResolver.java
+│   │               ├── model/
+│   │               │   ├── ErrorContext.java
+│   │               │   └── ErrorResponse.java
+│   │               └── util/
+│   │                   └── ValidationUtils.java
+│   └── resources/
+│       ├── validation-error-config.yml
+│       └── messages.properties
+```
+
+Let's go through each file:
+
+1. First, the configuration files:
+
+```yaml
+# src/main/resources/validation-error-config.yml
+validation:
+  errors:
+    mandatory:
+      code: "10001"
+      message-key: "validation.mandatory"
+    min-length:
+      code: "10001"
+      message-key: "validation.length.min"
+    max-length:
+      code: "10003"
+      message-key: "validation.length.max"
+    decimal-min:
+      code: "10100"
+      message-key: "validation.decimal.min"
+    decimal-max:
+      code: "10101"
+      message-key: "validation.decimal.max"
+    decimal-range:
+      code: "10102"
+      message-key: "validation.decimal.range"
+    bad-format:
+      code: "10103"
+      message-key: "validation.format.invalid"
+    bad-value:
+      code: "10104"
+      message-key: "validation.value.invalid"
+    default:
+      code: "10199"
+      message-key: "validation.default"
+  constraint-mappings:
+    "NotNull": "mandatory"
+    "NotEmpty": "mandatory"
+    "NotBlank": "mandatory"
+    "Size.min": "min-length"
+    "Length.min": "min-length"
+    "Size.max": "max-length"
+    "Length.max": "max-length"
+    "DecimalMin": "decimal-min"
+    "DecimalMax": "decimal-max"
+    "Range": "decimal-range"
+    "Digits": "decimal-range"
+    "Pattern": "bad-format"
+    "Email": "bad-format"
+    "ValueOfEnum": "bad-value"
+```
+
+```properties
+# src/main/resources/messages.properties
+validation.mandatory={0} must be present
+validation.length.min={0} length must be greater than minimum supported length
+validation.length.max={0} length must be lower than maximum supported length
+validation.decimal.min={0} value must be greater than minimum supported value
+validation.decimal.max={0} value must be lower than maximum supported value
+validation.decimal.range={0} value must be in the expected range
+validation.format.invalid={0} value must be in the expected format
+validation.value.invalid={0} value must have the expected value
+validation.default=Error Occurred
+```
+
+2. Now the Java classes:
+
+```java
+// src/main/java/com/example/validation/config/ValidationConfig.java
+@Configuration
+@EnableConfigurationProperties(ValidationProperties.class)
+public class ValidationConfig {
+    // Any additional configuration beans if needed
+}
+
+// src/main/java/com/example/validation/config/ValidationProperties.java
+@Data
+@Configuration
+@ConfigurationProperties(prefix = "validation")
+@PropertySource(value = "classpath:validation-error-config.yml", factory = YamlPropertySourceFactory.class)
+public class ValidationProperties {
+    private Map<String, ErrorConfig> errors;
+    private Map<String, String> constraintMappings;
+
+    @Data
+    public static class ErrorConfig {
+        private String code;
+        private String messageKey;
+    }
+}
+
+// src/main/java/com/example/validation/core/ConstraintTypeResolver.java
+public interface ConstraintTypeResolver {
+    String resolveType(FieldError error);
+}
+
+// src/main/java/com/example/validation/core/MessageArgsBuilder.java
+public interface MessageArgsBuilder {
+    String[] buildArgs(FieldError error);
+}
+
+// src/main/java/com/example/validation/core/ValidationResult.java
+public enum ValidationResult {
+    MIN, MAX, RANGE;
+    
+    public String asErrorType(String prefix) {
+        return prefix + "-" + name().toLowerCase();
+    }
+}
+
+// src/main/java/com/example/validation/util/ValidationUtils.java
+@UtilityClass
+public class ValidationUtils {
+    public static ValidationResult compareValue(Number value, Number boundary) {
+        return value.doubleValue() < boundary.doubleValue() ? 
+            ValidationResult.MIN : ValidationResult.MAX;
+    }
+
+    public static String resolveRangeViolationType(Number value, Number min, Number max) {
+        Map<Boolean, String> rangeTypeMap = Map.of(
+            Boolean.TRUE, "decimal-range",
+            Boolean.FALSE, value.doubleValue() < min.doubleValue() ? 
+                         "decimal-min" : "decimal-max"
+        );
+        return rangeTypeMap.get(
+            value.doubleValue() < min.doubleValue() && 
+            value.doubleValue() > max.doubleValue()
+        );
+    }
+}
+
+// src/main/java/com/example/validation/registry/ConstraintHandlerRegistry.java
+@Component
+public class ConstraintHandlerRegistry {
+    private final Map<String, ConstraintTypeResolver> resolvers;
+
+    public ConstraintHandlerRegistry() {
+        this.resolvers = new HashMap<>();
+        initializeResolvers();
+    }
+
+    private void initializeResolvers() {
+        // Size/Length constraints
+        resolvers.put("Size", error -> {
+            ValidationResult result = ValidationUtils.compareValue(
+                error.getRejectedValue().toString().length(),
+                (int) error.getArguments()[2]
+            );
+            return result.asErrorType("length");
+        });
+
+        // Numeric constraints
+        resolvers.put("Range", error -> {
+            Number value = (Number) error.getRejectedValue();
+            Number min = (Number) error.getArguments()[2];
+            Number max = (Number) error.getArguments()[1];
+            return ValidationUtils.resolveRangeViolationType(value, min, max);
+        });
+
+        // Direct mappings
+        Map<String, String> directMappings = Map.of(
+            "DecimalMin", "decimal-min",
+            "DecimalMax", "decimal-max",
+            "Digits", "decimal-range",
+            "Pattern", "bad-format",
+            "Email", "bad-format",
+            "NotNull", "mandatory",
+            "NotEmpty", "mandatory",
+            "NotBlank", "mandatory",
+            "ValueOfEnum", "bad-value"
+        );
+        
+        directMappings.forEach((key, value) -> 
+            resolvers.put(key, error -> value));
+    }
+
+    public String resolveConstraintType(FieldError error) {
+        return Optional.ofNullable(error.getCode())
+                .map(resolvers::get)
+                .map(resolver -> resolver.resolveType(error))
+                .orElse("default");
+    }
+}
+
+// src/main/java/com/example/validation/registry/MessageArgumentsRegistry.java
+@Component
+public class MessageArgumentsRegistry {
+    private final Map<String, MessageArgsBuilder> argsBuilders;
+
+    public MessageArgumentsRegistry() {
+        this.argsBuilders = new HashMap<>();
+        initializeBuilders();
+    }
+
+    private void initializeBuilders() {
+        Map<String, MessageArgsBuilder> builders = Map.of(
+            "decimal-min", error -> new String[]{
+                error.getField(),
+                error.getArguments()[2].toString()
+            },
+            "decimal-max", error -> new String[]{
+                error.getField(),
+                error.getArguments()[1].toString()
+            },
+            "decimal-range", error -> new String[]{
+                error.getField(),
+                error.getArguments()[2].toString(),
+                error.getArguments()[1].toString()
+            },
+            "min-length", error -> new String[]{
+                error.getField(),
+                error.getArguments()[2].toString()
+            },
+            "max-length", error -> new String[]{
+                error.getField(),
+                error.getArguments()[1].toString()
+            }
+        );
+        
+        argsBuilders.putAll(builders);
+    }
+
+    public String[] buildArguments(FieldError error, String errorType) {
+        return argsBuilders.getOrDefault(errorType, 
+            err -> new String[]{err.getField()})
+            .buildArgs(error);
+    }
+}
+
+// src/main/java/com/example/validation/model/ErrorContext.java
+@Data
+@Builder
+public class ErrorContext {
+    private int code;
+    private String message;
+}
+
+// src/main/java/com/example/validation/model/ErrorResponse.java
+@Data
+@Builder
+public class ErrorResponse {
+    private String title;
+    private int httpStatus;
+    private String traceId;
+    private String requestId;
+    private List<ErrorContext> context;
+}
+
+// src/main/java/com/example/validation/handler/ValidationErrorResolver.java
+@Component
+@RequiredArgsConstructor
+public class ValidationErrorResolver {
+    private final ValidationProperties validationProperties;
+    private final MessageSource messageSource;
+    private final ConstraintHandlerRegistry constraintRegistry;
+    private final MessageArgumentsRegistry messageArgumentsRegistry;
+
+    public ErrorContext resolveError(FieldError error, Locale locale) {
+        String constraintType = constraintRegistry.resolveConstraintType(error);
+        
+        String errorType = validationProperties.getConstraintMappings()
+                .getOrDefault(constraintType, "default");
+
+        ErrorConfig errorConfig = validationProperties.getErrors()
+                .getOrDefault(errorType, validationProperties.getErrors().get("default"));
+
+        String[] messageArgs = messageArgumentsRegistry.buildArguments(error, errorType);
+        
+        String message = messageSource.getMessage(
+                errorConfig.getMessageKey(),
+                messageArgs,
+                locale
+        );
+
+        return ErrorContext.builder()
+                .code(Integer.parseInt(errorConfig.getCode()))
+                .message(message)
+                .build();
+    }
+}
+
+// src/main/java/com/example/validation/handler/ValidationBoundaryHandler.java
+@RestControllerAdvice
+@RequiredArgsConstructor
+public class ValidationBoundaryHandler {
+    private final ValidationErrorResolver errorResolver;
+    
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleValidationExceptions(
+            MethodArgumentNotValidException ex,
+            WebRequest request) {
+        
+        List<ErrorContext> contextList = ex.getBindingResult()
+            .getFieldErrors()
+            .stream()
+            .map(error -> errorResolver.resolveError(error, request.getLocale()))
+            .collect(Collectors.toList());
+            
+        return ResponseEntity
+            .status(HttpStatus.BAD_REQUEST)
+            .body(ErrorResponse.builder()
+                .title("Validation Error")
+                .httpStatus(HttpStatus.BAD_REQUEST.value())
+                .traceId(MDC.get("traceId"))
+                .requestId(request.getHeader("X-Request-ID"))
+                .context(contextList)
+                .build());
+    }
+}
+```
+
+Usage example:
+```java
+@RestController
+@RequestMapping("/api/users")
+public class UserController {
+    
+    @PostMapping
+    public ResponseEntity<UserDTO> createUser(@Valid @RequestBody UserDTO userDTO) {
+        // Your implementation
+        return ResponseEntity.ok(userDTO);
+    }
+}
+
+@Data
+public class UserDTO {
+    @NotNull
+    @Size(min = 5, max = 15)
+    private String name;
+    
+    @Email
+    private String email;
+    
+    @DecimalMin("0.0")
+    @DecimalMax("1000.0")
+    private BigDecimal amount;
+    
+    @Range(min = 0, max = 100)
+    private Integer percentage;
+}
+```
+
+Would you like me to:
+1. Explain any specific part in more detail?
+2. Add more validation types?
+3. Show how to test these components?
