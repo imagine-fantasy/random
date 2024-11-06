@@ -1,0 +1,51 @@
+@Service
+@RequiredArgsConstructor
+public class ValidationErrorMapper {
+    private final ValidationProperties validationProperties;
+    private final MessageSource messageSource;
+
+    public ErrorContext mapFieldError(FieldError fieldError, Locale locale) {
+        ValidationErrorConfig errorConfig = getErrorConfig(fieldError);
+        
+        return ErrorContext.builder()
+            .code(Integer.valueOf(errorConfig.getCode()))
+            .message(formatMessage(errorConfig.getMessageKey(), fieldError, locale))
+            .build();
+    }
+
+    private ValidationErrorConfig getErrorConfig(FieldError fieldError) {
+        String validationType = Arrays.stream(fieldError.getCodes())
+            .map(this::lookupConstraintMapping)
+            .filter(Objects::nonNull)
+            .findFirst()
+            .orElse("default");
+
+        return validationProperties.getErrors().get(validationType);
+    }
+
+    private String lookupConstraintMapping(String code) {
+        return validationProperties.getConstraintMappings().get(
+            code.split("\\.")[0]  // Get the constraint name part
+        );
+    }
+
+    private String formatMessage(String messageKey, FieldError fieldError, Locale locale) {
+        Object[] args = getMessageArgs(fieldError);
+        return messageSource.getMessage(messageKey, args, locale);
+    }
+
+    private Object[] getMessageArgs(FieldError fieldError) {
+        List<Object> args = new ArrayList<>();
+        args.add(fieldError.getField());
+        
+        if (fieldError.getArguments() != null) {
+            Arrays.stream(fieldError.getArguments())
+                .filter(arg -> arg instanceof DefaultMessageSourceResolvable)
+                .map(arg -> ((DefaultMessageSourceResolvable) arg).getArguments())
+                .flatMap(Arrays::stream)
+                .forEach(args::add);
+        }
+        
+        return args.toArray();
+    }
+}
