@@ -1,0 +1,13 @@
+@Data
+@ConfigurationProperties(prefix = "validation")
+@Configuration
+public class ValidationProperties {
+    private Map<String, ValidationErrorConfig> errors;
+    private Map<String, String> constraintMappings;
+    
+    @Data
+    public static class ValidationErrorConfig {
+        private String code;
+        private String messageKey;
+    }
+}
