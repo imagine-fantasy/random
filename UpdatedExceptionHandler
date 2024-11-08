@@ -1,0 +1,102 @@
+// src/main/java/com/example/validation/handler/ValidationErrorResolver.java
+@Component
+@RequiredArgsConstructor
+public class ValidationErrorResolver {
+    private final ValidationProperties validationProperties;
+    private final MessageSource messageSource;
+    private final ConstraintHandlerRegistry constraintRegistry;
+    private final MessageArgumentsRegistry messageArgumentsRegistry;
+
+    public ErrorContext resolveError(FieldError error, Locale locale) {
+        String constraintType = constraintRegistry.resolveConstraintType(error);
+        
+        String errorType = validationProperties.getConstraintMappings()
+                .getOrDefault(constraintType, "default");
+
+        return buildErrorContext(errorType, error, locale);
+    }
+
+    public ErrorContext resolveError(HttpMessageNotReadableException ex, Locale locale) {
+        if (ex.getCause() instanceof InvalidFormatException) {
+            InvalidFormatException ife = (InvalidFormatException) ex.getCause();
+            return handleInvalidFormatException(ife, locale);
+        }
+        
+        return buildDefaultErrorContext(locale);
+    }
+
+    private ErrorContext handleInvalidFormatException(InvalidFormatException ife, Locale locale) {
+        String fieldName = ife.getPath().isEmpty() ? "unknown" : 
+            ife.getPath().get(0).getFieldName();
+        
+        if (ife.getTargetType().isEnum()) {
+            return buildErrorContext(
+                "bad-value",
+                createEnumFieldError(fieldName, ife.getValue()),
+                locale
+            );
+        }
+        
+        return buildErrorContext(
+            "bad-format",
+            createFormatFieldError(fieldName, ife.getValue()),
+            locale
+        );
+    }
+
+    private FieldError createEnumFieldError(String fieldName, Object value) {
+        return new FieldError(
+            "object",
+            fieldName,
+            value,
+            false,
+            new String[]{"ValueOfEnum"},
+            new Object[]{fieldName},
+            null
+        );
+    }
+
+    private FieldError createFormatFieldError(String fieldName, Object value) {
+        return new FieldError(
+            "object",
+            fieldName,
+            value,
+            false,
+            new String[]{"Pattern"},
+            new Object[]{fieldName},
+            null
+        );
+    }
+
+    private ErrorContext buildErrorContext(String errorType, FieldError error, Locale locale) {
+        ErrorConfig errorConfig = validationProperties.getErrors()
+                .getOrDefault(errorType, validationProperties.getErrors().get("default"));
+
+        String[] messageArgs = messageArgumentsRegistry.buildArguments(error, errorType);
+        
+        String message = messageSource.getMessage(
+                errorConfig.getMessageKey(),
+                messageArgs,
+                locale
+        );
+
+        return ErrorContext.builder()
+                .code(Integer.parseInt(errorConfig.getCode()))
+                .message(message)
+                .build();
+    }
+
+    private ErrorContext buildDefaultErrorContext(Locale locale) {
+        ErrorConfig defaultConfig = validationProperties.getErrors().get("default");
+        String message = messageSource.getMessage(
+                defaultConfig.getMessageKey(),
+                new Object[]{},
+                locale
+        );
+
+        return ErrorContext.builder()
+                .code(Integer.parseInt(defaultConfig.getCode()))
+                .message(message)
+                .build();
+    }
+}
