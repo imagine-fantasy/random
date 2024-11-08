@@ -1,0 +1,15 @@
+  Map<Class<?>, Function<Object, Integer>> sizeResolvers = Map.of(
+        String.class, value -> ((String) value).length(),
+        Object[].class, value -> ((Object[]) value).length,
+        Collection.class, value -> ((Collection<?>) value).size(),
+        Map.class, value -> ((Map<?, ?>) value).size()
+    );
+
+    Object rejectedValue = error.getRejectedValue();
+    int actualSize = Optional.ofNullable(rejectedValue)
+        .map(value -> sizeResolvers.entrySet().stream()
+            .filter(entry -> entry.getKey().isInstance(value))
+            .findFirst()
+            .map(entry -> entry.getValue().apply(value))
+            .orElseGet(() -> value.toString().length()))
+        .orElse(0);
