@@ -16,7 +16,7 @@ public class ValidationErrorResolver {
         return buildErrorContext(errorType, error, locale);
     }
 
- private Map<Class<? extends Exception>, Function<Exception, List<ErrorContext>>> errorHandlers;
+  private Map<Class<? extends Exception>, BiFunction<Exception, Locale, List<ErrorContext>>> errorHandlers;
 
     @PostConstruct
     public void initializeErrorHandlers() {
@@ -24,12 +24,12 @@ public class ValidationErrorResolver {
         
         errorHandlers.put(
             MethodArgumentNotValidException.class,
-            ex -> handleMethodArgumentNotValid((MethodArgumentNotValidException) ex)
+            (ex, locale) -> handleMethodArgumentNotValid((MethodArgumentNotValidException) ex, locale)
         );
         
         errorHandlers.put(
             HttpMessageNotReadableException.class,
-            ex -> handleHttpMessageNotReadable((HttpMessageNotReadableException) ex)
+            (ex, locale) -> handleHttpMessageNotReadable((HttpMessageNotReadableException) ex, locale)
         );
     }
 
@@ -163,7 +163,9 @@ public List<ErrorContext> resolveErrors(Exception ex, Locale locale) {
     }
 
     
-    private List<ErrorContext> handleMethodArgumentNotValid(MethodArgumentNotValidException ex) {
+       private List<ErrorContext> handleMethodArgumentNotValid(
+            MethodArgumentNotValidException ex, 
+            Locale locale) {
         return ex.getBindingResult()
             .getFieldErrors()
             .stream()
@@ -171,8 +173,11 @@ public List<ErrorContext> resolveErrors(Exception ex, Locale locale) {
             .collect(Collectors.toList());
     }
 
+
     
-    private List<ErrorContext> handleHttpMessageNotReadable(HttpMessageNotReadableException ex) {
+    private List<ErrorContext> handleHttpMessageNotReadable(
+            HttpMessageNotReadableException ex,
+            Locale locale) {
         if (ex.getCause() instanceof InvalidFormatException) {
             InvalidFormatException ife = (InvalidFormatException) ex.getCause();
             return List.of(handleInvalidFormatException(ife, locale));
