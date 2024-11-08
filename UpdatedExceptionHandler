@@ -161,4 +161,23 @@ public List<ErrorContext> resolveErrors(Exception ex, Locale locale) {
                 .message(message)
                 .build();
     }
+
+    
+    private List<ErrorContext> handleMethodArgumentNotValid(MethodArgumentNotValidException ex) {
+        return ex.getBindingResult()
+            .getFieldErrors()
+            .stream()
+            .map(error -> resolveError(error, locale))
+            .collect(Collectors.toList());
+    }
+
+    
+    private List<ErrorContext> handleHttpMessageNotReadable(HttpMessageNotReadableException ex) {
+        if (ex.getCause() instanceof InvalidFormatException) {
+            InvalidFormatException ife = (InvalidFormatException) ex.getCause();
+            return List.of(handleInvalidFormatException(ife, locale));
+        }
+        return List.of(buildDefaultErrorContext(locale));
+    }
+
 }
