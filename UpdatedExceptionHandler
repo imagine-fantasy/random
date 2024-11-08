@@ -44,40 +44,16 @@ public class ValidationErrorResolver {
             errors;
     }
 
-//java 21
-  public List<ErrorContext> resolveErrors(Exception ex, Locale locale) {
-        return switch (ex) {
-            case MethodArgumentNotValidException validationEx -> 
-                validationEx.getBindingResult()
-                    .getFieldErrors()
-                    .stream()
-                    .map(error -> resolveError(error, locale))
-                    .collect(Collectors.toList());
-            
-            case HttpMessageNotReadableException readableEx -> 
-                List.of(resolveError(readableEx, locale));
-            
-            default -> List.of(buildDefaultErrorContext(locale));
-        };
-    }
-
-//java 17
-
-public List<ErrorContext> resolveErrors(Exception ex, Locale locale) {
-    if (ex instanceof MethodArgumentNotValidException validationEx) {
-        return validationEx.getBindingResult()
-            .getFieldErrors()
-            .stream()
-            .map(error -> resolveError(error, locale))
+ public List<ErrorContext> resolveErrors(Exception ex, Locale locale) {
+        List<ErrorContext> errors = errorHandlers.entrySet().stream()
+            .filter(entry -> entry.getKey().isInstance(ex))
+            .flatMap(entry -> entry.getValue().apply(ex, locale).stream())  // Note: now passing locale
             .collect(Collectors.toList());
-    } 
-    
-    if (ex instanceof HttpMessageNotReadableException readableEx) {
-        return List.of(resolveError(readableEx, locale));
-    } 
-    
-    return List.of(buildDefaultErrorContext(locale));
-}
+
+        return errors.isEmpty() ? 
+            List.of(buildDefaultErrorContext(locale)) : 
+            errors;
+    }
     public ErrorContext resolveError(HttpMessageNotReadableException ex, Locale locale) {
         if (ex.getCause() instanceof InvalidFormatException) {
             InvalidFormatException ife = (InvalidFormatException) ex.getCause();
