@@ -16,6 +16,22 @@ public class ValidationErrorResolver {
         return buildErrorContext(errorType, error, locale);
     }
 
+  public List<ErrorContext> resolveErrors(Exception ex, Locale locale) {
+        return switch (ex) {
+            case MethodArgumentNotValidException validationEx -> 
+                validationEx.getBindingResult()
+                    .getFieldErrors()
+                    .stream()
+                    .map(error -> resolveError(error, locale))
+                    .collect(Collectors.toList());
+            
+            case HttpMessageNotReadableException readableEx -> 
+                List.of(resolveError(readableEx, locale));
+            
+            default -> List.of(buildDefaultErrorContext(locale));
+        };
+    }
+
     public ErrorContext resolveError(HttpMessageNotReadableException ex, Locale locale) {
         if (ex.getCause() instanceof InvalidFormatException) {
             InvalidFormatException ife = (InvalidFormatException) ex.getCause();
