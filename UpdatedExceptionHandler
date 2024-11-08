@@ -15,6 +15,35 @@ public class ValidationErrorResolver {
 
         return buildErrorContext(errorType, error, locale);
     }
+
+ private Map<Class<? extends Exception>, Function<Exception, List<ErrorContext>>> errorHandlers;
+
+    @PostConstruct
+    public void initializeErrorHandlers() {
+        errorHandlers = new HashMap<>();
+        
+        errorHandlers.put(
+            MethodArgumentNotValidException.class,
+            ex -> handleMethodArgumentNotValid((MethodArgumentNotValidException) ex)
+        );
+        
+        errorHandlers.put(
+            HttpMessageNotReadableException.class,
+            ex -> handleHttpMessageNotReadable((HttpMessageNotReadableException) ex)
+        );
+    }
+
+    public List<ErrorContext> resolveErrors(Exception ex, Locale locale) {
+        List<ErrorContext> errors = errorHandlers.entrySet().stream()
+            .filter(entry -> entry.getKey().isInstance(ex))
+            .flatMap(entry -> entry.getValue().apply(ex).stream())
+            .collect(Collectors.toList());
+
+        return errors.isEmpty() ? 
+            List.of(buildDefaultErrorContext(locale)) : 
+            errors;
+    }
+
 //java 21
   public List<ErrorContext> resolveErrors(Exception ex, Locale locale) {
         return switch (ex) {
