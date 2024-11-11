@@ -1,0 +1,7 @@
+<plugin>
+    <groupId>org.openapitools</groupId>
+    <artifactId>openapi-generator-maven-plugin</artifactId>
+    <configuration>
+        <templateDirectory>${project.basedir}/src/main/resources/templates</templateDirectory>
+    </configuration>
+</plugin>
