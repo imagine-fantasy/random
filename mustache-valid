@@ -1,0 +1,42 @@
+{{#vars}}
+    {{#required}}@NotNull(message = "{{name}} must be present") {{/required}}
+    
+    {{#pattern}}@Pattern(regexp = "{{{pattern}}}", message = "{{name}} must match the required format") {{/pattern}}
+    
+    {{#minLength}}{{#maxLength}}
+    @Size(min = {{minLength}}, max = {{maxLength}}, 
+          message = "{{name}} length must be between {{minLength}} and {{maxLength}}") 
+    {{/maxLength}}{{/minLength}}
+    
+    {{#minimum}}{{#maximum}}
+    @Range(min = {{minimum}}, max = {{maximum}}, 
+           message = "{{name}} value must be between {{minimum}} and {{maximum}}")
+    {{/maximum}}{{/minimum}}
+    
+    {{#minimum}}{{^maximum}}
+    @DecimalMin(value = "{{minimum}}", 
+                message = "{{name}} value must be greater than or equal to {{minimum}}")
+    {{/maximum}}{{/minimum}}
+    
+    {{^minimum}}{{#maximum}}
+    @DecimalMax(value = "{{maximum}}", 
+                message = "{{name}} value must be less than or equal to {{maximum}}")
+    {{/maximum}}{{/minimum}}
+    
+    {{#isEmail}}
+    @Email(message = "{{name}} must be a valid email address")
+    {{/isEmail}}
+
+    {{#enum}}
+    @ValueOfEnum(enumClass = {{enumClass}}.class, 
+                 message = "{{name}} must be one of: {{#allowableValues}}{{.}}{{^-last}}, {{/-last}}{{/allowableValues}}")
+    {{/enum}}
+
+    {{#isNumber}}
+    @Digits(integer = {{#digitCount}}{{integerDigits}}{{/digitCount}}, 
+            fraction = {{#digitCount}}{{fractionDigits}}{{/digitCount}},
+            message = "{{name}} numeric value out of bounds")
+    {{/isNumber}}
+    
+    private {{{datatypeWithEnum}}} {{name}}{{#defaultValue}} = {{{.}}}{{/defaultValue}};
+{{/vars}}
