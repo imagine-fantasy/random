@@ -1,0 +1,18 @@
+  @Generated(value = "org.openapitools.codegen.languages.SpringCodegen")
+            @Schema(description = "{{description}}")
+            public class {{classname}} {
+                {{#vars}}
+                /**
+                * {{#description}}{{description}}{{/description}}
+                */
+                {{#required}}
+                @NotNull(message = "test message")
+                {{/required}}
+                
+                {{#minLength}}{{#maxLength}}
+                @Size(min = {{minLength}}, max = {{maxLength}}, message = "test message")
+                {{/maxLength}}{{/minLength}}
+                
+                private {{{datatypeWithEnum}}} {{name}}{{#defaultValue}} = {{{.}}}{{/defaultValue}};
+                {{/vars}}
+            }
