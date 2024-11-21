@@ -1,0 +1,34 @@
+Liquibase Database Migration Strategy
+Master Configuration
+✨ Single Source of Truth
+
+One master changelog file controls all database changes
+Each release gets its own changelog file
+Cached for 60 minutes to optimize performance
+
+Change Management Strategy
+🎯 Release-Based Organization
+
+Changes organized by release versions (e.g., 202501, 202502)
+Multiple changelog files per release for better maintainability
+Example: changelog-202501-1.yml, changelog-202501-2.yml
+
+Folder Structure Best Practices
+📂 Clean Separation
+Copy/resources
+    /db
+        /changelog
+            /release-202501/
+            /release-202502/
+        /scripts
+
+Separates SQL scripts from changelog definitions
+Each release in its own folder
+Easy to track, review, and rollback changes
+
+Change Implementation
+🔄 Ordered Execution Pattern
+
+Create new tables/schema
+Data migration/insertion
+Cleanup old schema
