@@ -26,9 +26,38 @@ Separates SQL scripts from changelog definitions
 Each release in its own folder
 Easy to track, review, and rollback changes
 
-Change Implementation
-🔄 Ordered Execution Pattern
+Folder Structure Best Practices
+📂 Clean Separation
+Copy/resources
+    /db
+        /changelog
+            /release-202501/
+                /ddl/
+                    - create_table.sql
+                    - alter_table.sql
+                /dml/
+                    - insert_data.sql
+                    - update_data.sql
+            /release-202502/
+                /ddl/
+                /dml/
 
-Create new tables/schema
-Data migration/insertion
-Cleanup old schema
+Clear separation of DDL and DML scripts per release
+Each type of change in its dedicated folder
+Maintains clean audit trail of structural vs data changes
+
+Change Implementation
+🔄 Organized Change Pattern
+
+DDL Changes (/ddl/)
+
+Schema modifications
+Table structures
+Indexes and constraints
+
+
+DML Changes (/dml/)
+
+Data migrations
+Reference data
+Data updates
