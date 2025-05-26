@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Temporary Spend Controls API Proposal</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1, h2, h3, h4 {
+            color: #0747a6;
+            margin-top: 1.5em;
+            margin-bottom: 0.5em;
+        }
+        h1 {
+            font-size: 2em;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 0.3em;
+        }
+        h2 {
+            font-size: 1.5em;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 0.3em;
+        }
+        h3 {
+            font-size: 1.25em;
+        }
+        h4 {
+            font-size: 1.1em;
+        }
+        p {
+            margin: 1em 0;
+        }
+        a {
+            color: #0052cc;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        code {
+            font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+            background-color: #f6f8fa;
+            padding: 0.2em 0.4em;
+            border-radius: 3px;
+            font-size: 0.9em;
+        }
+        pre {
+            background-color: #f6f8fa;
+            border-radius: 3px;
+            font-size: 0.9em;
+            padding: 1em;
+            overflow: auto;
+        }
+        pre code {
+            background-color: transparent;
+            padding: 0;
+        }
+        blockquote {
+            margin: 1em 0;
+            padding: 0 1em;
+            color: #6a737d;
+            border-left: 0.25em solid #dfe1e6;
+        }
+        ul, ol {
+            padding-left: 2em;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 1em 0;
+        }
+        th, td {
+            border: 1px solid #dfe1e6;
+            padding: 8px 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f4f5f7;
+            font-weight: 600;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .note {
+            background-color: #e6f6ff;
+            border-left: 4px solid #0052cc;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 3px;
+        }
+        .warning {
+            background-color: #fff8f7;
+            border-left: 4px solid #de350b;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 3px;
+        }
+        .mermaid-placeholder {
+            background-color: #f4f5f7;
+            border: 1px dashed #dfe1e6;
+            padding: 20px;
+            text-align: center;
+            margin: 20px 0;
+            border-radius: 3px;
+        }
+        .summary {
+            background-color: #f3f4f5;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+            border-left: 4px solid #0052cc;
+        }
+    </style>
+</head>
+<body>
+    <h1>Temporary Spend Controls API Proposal</h1>
+    
+    <div class="summary">
+        <h3>Executive Summary</h3>
+        <p>This proposal outlines two approaches for implementing temporary spend controls that allow cardholders to modify their card spending limits for specific date ranges without permanently altering their standard configuration. The core decision centers on whether Juno should maintain the orchestration logic (Approach 1) or if Card Domain should implement dedicated endpoints and manage the lifecycle (Approach 2). Given our existing PUT-based API that uses "replace all" semantics, we recommend Approach 2 with blocking of permanent updates during temporary periods to provide the cleanest user experience with minimal risk of configuration errors.</p>
+    </div>
+
+    <h2>Background</h2>
+    <p>Currently, our internal partner channel (Juno) connects to TSYS TS1, which offers temporary spend control functionality. This allows users to increase limits (daily, credit, quarterly, single transaction) for specific date ranges through the UI. When the specified period ends, a batch process automatically reverts to the original configuration.</p>
+    <p>As we transition to the Card Domain platform, we need to determine how to implement this functionality while maintaining a clean architecture and minimizing implementation complexity.</p>
+
+    <h2>Implementation Approaches</h2>
+
+    <h3>Approach Comparison</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Approach</th>
+                <th>Description</th>
+                <th>Advantages</th>
+                <th>Considerations</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Approach 1: Juno Orchestration</strong></td>
+                <td>Juno manages temp control logic and uses existing Card Domain PUT endpoint for updates</td>
+                <td>
+                    <ul>
+                        <li>Minimal changes to Card Domain</li>
+                        <li>Leverages existing update endpoint</li>
+                        <li>Clear separation of responsibilities</li>
+                    </ul>
+                </td>
+                <td>
+                    <ul>
+                        <li>Burden on Juno to maintain orchestration</li>
+                        <li>Potential for errors in state management</li>
+                        <li>Higher operational complexity for Juno</li>
+                    </ul>
+                </td>
+            </tr>
+            <tr>
+                <td><strong>Approach 2: Card Domain Orchestration</strong></td>
+                <td>Card Domain provides dedicated temp control endpoints and manages activation/deactivation</td>
+                <td>
+                    <ul>
+                        <li>Centralized orchestration logic</li>
+                        <li>Simplified client integration</li>
+                        <li>Enhanced visibility and management</li>
+                        <li>Reduced risk of errors</li>
+                    </ul>
+                </td>
+                <td>
+                    <ul>
+                        <li>New endpoints required</li>
+                        <li>Additional batch processing logic</li>
+                        <li>Higher implementation effort</li>
+                    </ul>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h3>Managing Updates During Active Temporary Controls</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Approach</th>
+                <th>Description</th>
+                <th>Advantages</th>
+                <th>Considerations</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Option 1: Block Updates</strong></td>
+                <td>Reject permanent control updates during active temporary periods</td>
+                <td>
+                    <ul>
+                        <li>Clean separation</li>
+                        <li>Prevents accidental overrides</li>
+                        <li>Simple implementation</li>
+                    </ul>
+                </td>
+                <td>
+                    <ul>
+                        <li>May frustrate users needing to make permanent changes</li>
+                    </ul>
+                </td>
+            </tr>
+            <tr>
+                <td><strong>Option 2: Client Responsibility</strong></td>
+                <td>Allow updates but require clients to include temporary values</td>
+                <td>
+                    <ul>
+                        <li>Flexibility for updates</li>
+                        <li>No blocking of functionality</li>
+                    </ul>
+                </td>
+                <td>
+                    <ul>
+                        <li>Risk of accidental override</li>
+                        <li>Client implementation complexity</li>
+                    </ul>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>Detailed Approach Analysis</h2>
+
+    <h3>Approach 1: Juno Orchestration</h3>
+    <p>In this approach, Juno maintains the orchestration logic for temporary spend controls:</p>
+    <ol>
+        <li>Juno stores the temporary control configuration and effective dates</li>
+        <li>Juno runs a batch process to monitor when temporary controls need to be activated</li>
+        <li>When activation is needed, Juno calls Card Domain's existing PUT endpoint to update the spend controls</li>
+        <li>When the temporary period ends, Juno calls the PUT endpoint again to restore original values</li>
+    </ol>
+
+    <div class="mermaid-placeholder">
+        <p><strong>Approach 1: Juno Orchestration - Sequence Diagram</strong></p>
+        <p><em>Please insert Mermaid diagram from document or Lucid chart here after import</em></p>
+    </div>
+
+    <h3>Approach 2: Card Domain Orchestration</h3>
+    <p>In this approach, Card Domain manages the orchestration logic for temporary spend controls:</p>
+    <ol>
+        <li>Card Domain provides a new endpoint for creating temporary controls</li>
+        <li>Card Domain stores the temporary configuration and effective dates</li>
+        <li>Card Domain runs a batch process to activate/deactivate temporary controls</li>
+        <li>Card Domain manages precedence rules between temporary and permanent controls</li>
+    </ol>
+
+    <div class="mermaid-placeholder">
+        <p><strong>Approach 2: Card Domain Orchestration - Sequence Diagram</strong></p>
+        <p><em>Please insert Mermaid diagram from document or Lucid chart here after import</em></p>
+    </div>
+
+    <h2>Required Endpoints for Approach 2</h2>
+    <p>To fully support Card Domain orchestration of temporary spend controls, the following endpoints would be required:</p>
+
+    <pre><code>POST /api/v1/cards/{cardId}/temporarySpendControls</code></pre>
+    <p>Creates a new temporary spend control configuration.</p>
+
+    <pre><code>GET /api/v1/cards/{cardId}/temporarySpendControls</code></pre>
+    <p>Retrieves all temporary spend control configurations for a card.</p>
+
+    <pre><code>GET /api/v1/cards/{cardId}/temporarySpendControls/{temporaryId}</code></pre>
+    <p>Retrieves a specific temporary spend control configuration.</p>
+
+    <pre><code>GET /api/v1/cards/{cardId}/temporarySpendControls/active</code></pre>
+    <p>Retrieves currently active temporary spend control configurations.</p>
+
+    <pre><code>DELETE /api/v1/cards/{cardId}/temporarySpendControls/{temporaryId}</code></pre>
+    <p>Cancels a temporary spend control configuration.</p>
+
+    <h2>Technical Approach for Card Domain Orchestration</h2>
+    <p>If Approach 2 is selected, the implementation would include:</p>
+    <ol>
+        <li>New data model to store temporary spend controls with effective dates</li>
+        <li>New API endpoints for managing temporary controls</li>
+        <li>Batch process to monitor and apply/remove temporary controls</li>
+        <li>Logic to handle the interaction between permanent and temporary controls</li>
+    </ol>
+
+    <h3>API Design</h3>
+    <h4>Primary Endpoint</h4>
+    <pre><code>POST /api/v1/cards/{cardId}/temporarySpendControls</code></pre>
+    <p>This endpoint creates a temporary spend control configuration that applies only during the specified date range. The request would include effective dates along with the spend control parameters to be temporarily modified.</p>
+
+    <h4>Key Fields</h4>
+    <table>
+        <thead>
+            <tr>
+                <th>Field</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>name</td>
+                <td>Identifier for the temporary configuration</td>
+            </tr>
+            <tr>
+                <td>description</td>
+                <td>Optional explanation of purpose</td>
+            </tr>
+            <tr>
+                <td>effectiveStartDate</td>
+                <td>Date and time when temporary controls become active</td>
+            </tr>
+            <tr>
+                <td>effectiveEndDate</td>
+                <td>Date and time when temporary controls expire</td>
+            </tr>
+            <tr>
+                <td>spendControls</td>
+                <td>Configuration following existing spend control schema</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>The PUT vs. PATCH Conundrum: Why Blocking Makes Sense</h2>
+    <p>Here's an essential technical consideration that shapes our approach: our current update endpoint for spend controls uses PUT semantics (replace all) rather than PATCH (update specific fields). This seemingly minor implementation detail has significant implications for how we handle temporary controls.</p>
+    <p>Think of it this way: it's like the difference between replacing your entire wardrobe versus just swapping out a single sweater. With PUT, you're essentially saying "here's my complete new outfit from head to toe" rather than "I'd just like to change my shoes, please."</p>
+    <p>When a temporary control is active, this PUT behavior creates a particularly delicate situation. Here's why blocking permanent updates during active temporary periods makes good sense:</p>
+
+    <h3>The "Replace All" Challenge</h3>
+    <p>When a client uses the PUT endpoint, they're providing a complete replacement of the entire configuration. If a temporary daily limit of $500 is active, but the client submits a permanent update without knowledge of this temporary setting, they would inadvertently override it, bringing back the original $100 limit mid-vacation!</p>
+    <p>It's like having a house-sitter who doesn't know you've temporarily turned up the thermostat for your pet lizard, and they helpfully "fix" it back to your usual setting—your poor gecko isn't going to have a good day.</p>
+
+    <h3>The Client Responsibility Burden</h3>
+    <p>We could ask clients to always include active temporary values in their PUT requests, but this places a significant cognitive and technical burden on them. They would need to:</p>
+    <ol>
+        <li>Check if any temporary controls are active before making updates</li>
+        <li>Correctly merge temporary and permanent values</li>
+        <li>Ensure they don't accidentally reset temporary values</li>
+    </ol>
+    <p>This is akin to asking someone to remember and accommodate your temporary dietary restrictions every time they cook for you, rather than simply posting a note on the refrigerator saying "no dairy this week."</p>
+
+    <h3>The Conceptual Clarity Issue</h3>
+    <p>Temporary and permanent controls represent two distinct conceptual layers of configuration that operate on different timelines. Forcing them to coexist in the same update operation muddies these waters.</p>
+    <p>It's like trying to make both long-term retirement investments and short-term vacation budget decisions in the same financial planning session—certainly possible, but prone to confusion and mistakes.</p>
+
+    <h3>Practical Reality</h3>
+    <p>Since the endpoint uses PUT semantics and replaces the entire configuration, blocking updates during active temporary periods creates a clean separation of concerns that:</p>
+    <ul>
+        <li>Prevents accidental overrides of temporary settings</li>
+        <li>Reduces cognitive load on API consumers</li>
+        <li>Maintains clear boundaries between temporary and permanent configurations</li>
+        <li>Eliminates a whole class of potential bugs and support issues</li>
+    </ul>
+    <p>If our endpoint used PATCH semantics (which allows targeted updates to specific fields), we might have more flexibility. But with PUT, the blocking approach offers the clearest path forward with the lowest risk of confusion or error.</p>
+    <p>As architects, sometimes the kindest thing we can do is set clear boundaries that prevent users from accidentally shooting themselves in the foot!</p>
+
+    <h2>Business Use Cases</h2>
+
+    <h3>International Travel</h3>
+    <p>A cardholder with standard domestic limits can temporarily increase daily limits and enable international transactions for a specific travel period. Upon return, limits automatically revert to their standard configuration.</p>
+
+    <h3>Seasonal Business Spending</h3>
+    <p>A business can temporarily adjust procurement card limits during peak purchasing seasons without permanently altering their standard controls.</p>
+
+    <h2>Security and Compliance</h2>
+    <ul>
+        <li>Authorization controls will match those of permanent spend control modifications</li>
+        <li>Complete audit trail of temporary configuration creation, activation, and expiration</li>
+        <li>Optional notification system to alert relevant stakeholders of temporary control changes</li>
+    </ul>
+
+    <h2>Migration Considerations</h2>
+    <p>For seamless transition from the Juno/TS1 implementation:</p>
+    <ol>
+        <li>Data migration plan for existing temporary configurations</li>
+        <li>Mapping between TS1 and card domain platform data models</li>
+        <li>Phased rollout strategy to ensure service continuity</li>
+    </ol>
+
+    <h2>Recommendation</h2>
+    <p>Based on the analysis, <strong>Approach 2: Card Domain Orchestration</strong> is recommended for the following reasons:</p>
+    <ol>
+        <li><strong>Reduced Operational Risk</strong>: Centralizing orchestration in Card Domain reduces the chance of state mismanagement</li>
+        <li><strong>Improved User Experience</strong>: Provides a more cohesive and purpose-built interface for temporary controls</li>
+        <li><strong>Enhanced Visibility</strong>: Allows for better tracking and management of temporary controls</li>
+        <li><strong>Simplified Client Integration</strong>: Requires fewer integration points and specialized knowledge from clients</li>
+    </ol>
+    <p>While this approach requires more initial development effort, it provides a more robust and maintainable solution in the long term.</p>
+    <p>For handling updates during temporary control periods, <strong>Option 1: Block Updates</strong> is recommended initially for its simplicity and lower risk of errors. Option 2 could be considered as a future enhancement if significant demand for concurrent updates emerges.</p>
+
+    <h2>Implementation Plan</h2>
+    <p>If Approach 2 is approved, we recommend the following implementation phases:</p>
+    <h3>Phase 1: Core temporary controls functionality</h3>
+    <ul>
+        <li>Data model for storing temporary controls</li>
+        <li>POST and DELETE endpoints</li>
+        <li>Batch activation/deactivation process</li>
+        <li>Blocking permanent updates during temporary periods</li>
+    </ul>
+
+    <h3>Phase 2: Enhanced management capabilities</h3>
+    <ul>
+        <li>GET endpoints for querying temporary controls</li>
+        <li>Notification system for activation/deactivation</li>
+        <li>Enhanced reporting and audit logging</li>
+    </ul>
+
+    <h3>Phase 3 (Optional): Advanced features</h3>
+    <ul>
+        <li>Support for multiple concurrent temporary controls</li>
+        <li>Non-blocking update approach (Option 2)</li>
+        <li>Enhanced validation and conflict resolution</li>
+    </ul>
+
+    <h2>Conclusion</h2>
+    <p>Implementing temporary spend controls represents an important feature for maintaining parity with the existing system while enhancing overall platform capabilities. The Card Domain orchestration approach provides the most robust and maintainable solution, albeit with higher initial implementation costs that will be offset by reduced operational complexity and enhanced user experience.</p>
+
+    <h2>Next Steps</h2>
+    <ol>
+        <li>Review and select preferred implementation approach</li>
+        <li>Finalize API specification based on latest spend control schema</li>
+        <li>Develop detailed implementation plan for selected approach</li>
+        <li>Review technical approach with architecture team</li>
+        <li>Define success metrics and testing criteria</li>
+    </ol>
+</body>
+</html>
