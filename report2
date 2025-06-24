@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Validation Framework Implementation Documentation</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+        .header {
+            border-bottom: 3px solid #0066cc;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        h1 {
+            color: #0066cc;
+            margin-bottom: 10px;
+        }
+        h2 {
+            color: #004499;
+            border-left: 4px solid #0066cc;
+            padding-left: 15px;
+            margin-top: 30px;
+        }
+        h3 {
+            color: #0066cc;
+            margin-top: 25px;
+        }
+        .implementation-box {
+            background: #f8f9ff;
+            border: 1px solid #e1e5f2;
+            border-radius: 6px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .code-block {
+            background: #f6f8fa;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 16px;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+        .flow-diagram {
+            background: #f8f9ff;
+            padding: 20px;
+            border-radius: 6px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .flow-step {
+            display: inline-block;
+            background: #0066cc;
+            color: white;
+            padding: 8px 12px;
+            margin: 5px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        .arrow {
+            font-size: 16px;
+            color: #0066cc;
+            margin: 0 8px;
+        }
+        .validation-layer {
+            border: 2px solid #e1e4e8;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            background: #fafbfc;
+        }
+        .layer-title {
+            font-weight: bold;
+            color: #0066cc;
+            margin-bottom: 10px;
+        }
+        .constraint-mapping {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 15px 0;
+        }
+        .mapping-section {
+            background: #f6f8fa;
+            padding: 15px;
+            border-radius: 6px;
+        }
+        .known-issue {
+            background: #fff8e1;
+            border-left: 4px solid #ff9800;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .technical-detail {
+            background: #e8f4fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .error-response-example {
+            background: #f1f8e9;
+            border: 1px solid #c8e6c9;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .config-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        .config-table th, .config-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        .config-table th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Validation Framework Implementation</h1>
+        <p><strong>Comprehensive documentation of our location-aware validation error resolution system</strong></p>
+        <p><em>Technical implementation reference covering structural, semantic, and business validation layers</em></p>
+    </div>
+
+```
+<h2>Implementation Overview</h2>
+<div class="implementation-box">
+    <p>This framework implements a three-layer validation approach that transforms raw Spring validation exceptions into standardized, location-aware business error responses. The system handles structural validation (field constraints), semantic validation (business rules), and provides consistent error formatting with internationalization support.</p>
+    
+    <div class="flow-diagram">
+        <div class="flow-step">Request Input</div>
+        <span class="arrow">→</span>
+        <div class="flow-step">Structural Validation</div>
+        <span class="arrow">→</span>
+        <div class="flow-step">Semantic Validation</div>
+        <span class="arrow">→</span>
+        <div class="flow-step">ValidationErrorResolver</div>
+        <span class="arrow">→</span>
+        <div class="flow-step">Unified Error Response</div>
+    </div>
+</div>
+
+<h2>Validation Layers Implementation</h2>
+
+<h2>Core Processing Flows</h2>
+
+<h3>Main Validation Error Resolution Flow</h3>
+<div style="background: #f8f9ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
+    <div style="display: flex; flex-direction: column; gap: 15px;">
+        <!-- Start -->
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <div style="background: #4CAF50; color: white; padding: 12px 20px; border-radius: 6px; min-width: 200px; text-align: center; font-weight: bold;">
+                ValidationErrorResolver
+            </div>
+            <div style="font-size: 20px; color: #666;">→</div>
+            <div style="background: #2196F3; color: white; padding: 12px 20px; border-radius: 6px; min-width: 200px; text-align: center;">
+                Extract Constraint Type
+            </div>
+        </div>
+        
+        <!-- Step 2 -->
+        <div style="display: flex; align-items: center; gap: 15px; margin-left: 50px;">
+            <div style="font-size: 20px; color: #666;">↓</div>
+        </div>
+        
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <div style="background: #FF9800; color: white; padding: 12px 20px; border-radius: 6px; min-width: 200px; text-align: center;">
+                Map to Business Error Type
+            </div>
+            <div style="font-size: 20px; color: #666;">→</div>
+            <div style="background: #9C27B0; color: white; padding: 12px 20px; border-radius: 6px; min-width: 200px; text-align: center;">
+                Build Error Context
+            </div>
+        </div>
+        
+        <!-- Sub-process breakdown -->
+        <div style="margin-left: 30px; border-left: 3px solid #ddd; padding-left: 20px;">
+            <div style="font-weight: bold; color: #666; margin-bottom: 10px;">Build Error Context Steps:</div>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div style="background: #E1BEE7; padding: 8px 12px; border-radius: 4px; font-size: 14px;">1. Set Field Name</div>
+                    <div style="background: #E1BEE7; padding: 8px 12px; border-radius: 4px; font-size: 14px;">2. Detect Location (BODY/HEADER/QUERY)</div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div style="background: #E1BEE7; padding: 8px 12px; border-radius: 4px; font-size: 14px;">3. Get Business Error Code</div>
+                    <div style="background: #E1BEE7; padding: 8px 12px; border-radius: 4px; font-size: 14px;">4. Format Localized Message</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Final step -->
+        <div style="display: flex; align-items: center; gap: 15px; margin-left: 50px;">
+            <div style="font-size: 20px; color: #666;">↓</div>
+        </div>
+        
+        <div style="text-align: center;">
+            <div style="background: #4CAF50; color: white; padding: 12px 20px; border-radius: 6px; display: inline-block; font-weight: bold;">
+                Return Standardized ErrorContext
+            </div>
+        </div>
+    </div>
+</div>
+
+<h3>Exception Type Routing Decision Tree</h3>
+<div style="background: #f0f8ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
+    <div style="text-align: center; margin-bottom: 20px;">
+        <div style="background: #FF5722; color: white; padding: 12px 20px; border-radius: 6px; display: inline-block; font-weight: bold;">
+            Exception Thrown
+        </div>
+    </div>
+    
+    <div style="display: flex; justify-content: space-around; flex-wrap: wrap; gap: 20px;">
+        <!-- MethodArgumentNotValid -->
+        <div style="flex: 1; min-width: 250px;">
+            <div style="background: #2196F3; color: white; padding: 10px; border-radius: 6px; text-align: center; margin-bottom: 10px;">
+                MethodArgumentNotValidException
+            </div>
+            <div style="font-size: 18px; text-align: center; margin: 10px 0;">↓</div>
+            <div style="background: #E3F2FD; padding: 15px; border-radius: 6px; border: 2px solid #2196F3;">
+                <div style="font-weight: bold; margin-bottom: 8px;">Process:</div>
+                <div style="font-size: 14px; line-height: 1.5;">
+                    • Extract all FieldErrors<br>
+                    • Process each one individually<br>
+                    • Aggregate into error list<br>
+                    • Return multiple errors together
+                </div>
+            </div>
+        </div>
+        
+        <!-- HttpMessageNotReadable -->
+        <div style="flex: 1; min-width: 250px;">
+            <div style="background: #FF9800; color: white; padding: 10px; border-radius: 6px; text-align: center; margin-bottom: 10px;">
+                HttpMessageNotReadableException
+            </div>
+            <div style="font-size: 18px; text-align: center; margin: 10px 0;">↓</div>
+            <div style="background: #FFF3E0; padding: 15px; border-radius: 6px; border: 2px solid #FF9800;">
+                <div style="font-weight: bold; margin-bottom: 8px;">Decision:</div>
+                <div style="font-size: 14px; line-height: 1.5;">
+                    • Enum parsing failed? → "bad-value"<br>
+                    • Format parsing failed? → "bad-format"<br>
+                    • Other JSON issue? → "default"<br>
+                    • Creates synthetic FieldError
+                </div>
+            </div>
+        </div>
+        
+        <!-- ConstraintViolation -->
+        <div style="flex: 1; min-width: 250px;">
+            <div style="background: #9C27B0; color: white; padding: 10px; border-radius: 6px; text-align: center; margin-bottom: 10px;">
+                ConstraintViolationException
+            </div>
+            <div style="font-size: 18px; text-align: center; margin: 10px 0;">↓</div>
+            <div style="background: #F3E5F5; padding: 15px; border-radius: 6px; border: 2px solid #9C27B0;">
+                <div style="font-weight: bold; margin-bottom: 8px;">Process:</div>
+                <div style="font-size: 14px; line-height: 1.5;">
+                    • Extract constraint violations<br>
+                    • Convert to FieldError format<br>
+                    • Process same as above<br>
+                    • Same error aggregation
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h3>Constraint Type → Business Error Mapping</h3>
+<div style="background: #f5f8f0; padding: 20px; border-radius: 8px; margin: 20px 0;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px;">
+        
+        <div style="background: white; padding: 15px; border-radius: 6px; border-left: 4px solid #4CAF50;">
+            <div style="font-weight: bold; color: #4CAF50; margin-bottom: 10px;">Mandatory Fields</div>
+            <div style="font-size: 14px;">
+                <strong>Input:</strong> @NotNull, @NotEmpty, @NotBlank<br>
+                <strong>Output:</strong> "mandatory" → Code 10001<br>
+                <strong>Message:</strong> "field must be present"
+            </div>
+        </div>
+        
+        <div style="background: white; padding: 15px; border-radius: 6px; border-left: 4px solid #2196F3;">
+            <div style="font-weight: bold; color: #2196F3; margin-bottom: 10px;">Length Constraints</div>
+            <div style="font-size: 14px;">
+                <strong>Input:</strong> @Size, @Length (min/max)<br>
+                <strong>Logic:</strong> Compare actual vs required<br>
+                <strong>Output:</strong> "min-length" (10002) or "max-length" (10003)
+            </div>
+        </div>
+        
+        <div style="background: white; padding: 15px; border-radius: 6px; border-left: 4px solid #FF9800;">
+            <div style="font-weight: bold; color: #FF9800; margin-bottom: 10px;">Numeric Ranges</div>
+            <div style="font-size: 14px;">
+                <strong>Input:</strong> @DecimalMin, @DecimalMax, @Range<br>
+                <strong>Analysis:</strong> Value vs boundary comparison<br>
+                <strong>Output:</strong> Specific range error (10100-10102)
+            </div>
+        </div>
+        
+        <div style="background: white; padding: 15px; border-radius: 6px; border-left: 4px solid #9C27B0;">
+            <div style="font-weight: bold; color: #9C27B0; margin-bottom: 10px;">Format & Values</div>
+            <div style="font-size: 14px;">
+                <strong>Input:</strong> @Pattern, @Email, Enum failures<br>
+                <strong>Output:</strong> "bad-format" (10103) or "bad-value" (10104)<br>
+                <strong>Special:</strong> JSON parsing failures handled here
+            </div>
+        </div>
+        
+    </div>
+</div>
+
+<h3>Location Detection Logic</h3>
+<div style="background: #fff8f0; padding: 20px; border-radius: 8px; margin: 20px 0;">
+    <div style="text-align: center; margin-bottom: 20px;">
+        <div style="background: #795548; color: white; padding: 12px 20px; border-radius: 6px; display: inline-block; font-weight: bold;">
+            Analyze Spring Parameter Annotations
+        </div>
+    </div>
+    
+    <div style="display: flex; justify-content: space-around; align-items: center; flex-wrap: wrap; gap: 15px;">
+        <div style="text-align: center;">
+            <div style="background: #4CAF50; color: white; padding: 10px 15px; border-radius: 6px; margin-bottom: 8px;">@PathVariable</div>
+            <div style="font-size: 18px;">↓</div>
+            <div style="background: #C8E6C9; padding: 8px 12px; border-radius: 4px; font-weight: bold;">PATH</div>
+        </div>
+        
+        <div style="text-align: center;">
+            <div style="background: #2196F3; color: white; padding: 10px 15px; border-radius: 6px; margin-bottom: 8px;">@RequestBody</div>
+            <div style="font-size: 18px;">↓</div>
+            <div style="background: #BBDEFB; padding: 8px 12px; border-radius: 4px; font-weight: bold;">BODY</div>
+        </div>
+        
+        <div style="text-align: center;">
+            <div style="background: #FF9800; color: white; padding: 10px 15px; border-radius: 6px; margin-bottom: 8px;">@RequestParam</div>
+            <div style="font-size: 18px;">↓</div>
+            <div style="background: #FFE0B2; padding: 8px 12px; border-radius: 4px; font-weight: bold;">QUERY</div>
+        </div>
+        
+        <div style="text-align: center;">
+            <div style="background: #9C27B0; color: white; padding: 10px 15px; border-radius: 6px; margin-bottom: 8px;">@RequestHeader</div>
+            <div style="font-size: 18px;">↓</div>
+            <div style="background: #E1BEE7; padding: 8px 12px; border-radius: 4px; font-weight: bold;">HEADER</div>
+        </div>
+        
+        <div style="text-align: center;">
+            <div style="background: #607D8B; color: white; padding: 10px 15px; border-radius: 6px; margin-bottom: 8px;">No Annotation</div>
+            <div style="font-size: 18px;">↓</div>
+            <div style="background: #CFD8DC; padding: 8px 12px; border-radius: 4px; font-weight: bold;">BODY (default)</div>
+        </div>
+    </div>
+</div>
+
+<h2>Flow Examples in Action</h2>
+
+<h3>Example 1: Request Body Validation Flow</h3>
+<div class="error-response-example">
+    <h4>Input Request:</h4>
+    <div class="code-block">
+```
+
+POST /api/customers
+Content-Type: application/json
+
+{
+“name”: “Jo”,           // Too short (min=5)
+“email”: “invalid-email”, // Bad format
+“amount”: -100          // Below minimum (min=0)
+}
+</div>
+
+```
+    <h4>Flow Execution:</h4>
+    <div style="background: #f8f9ff; padding: 15px; border-radius: 6px; margin: 10px 0;">
+        <strong>1. Exception Routing:</strong> MethodArgumentNotValidException detected<br>
+        <strong>2. Field Processing:</strong> 3 FieldError objects extracted<br>
+        <strong>3. For each FieldError:</strong><br>
+        &nbsp;&nbsp;• <strong>name field:</strong> "Size" constraint → "min-length" → code 10002<br>
+        &nbsp;&nbsp;• <strong>email field:</strong> "Email" constraint → "bad-format" → code 10103<br>
+        &nbsp;&nbsp;• <strong>amount field:</strong> "DecimalMin" constraint → "decimal-min" → code 10100<br>
+        <strong>4. Location Detection:</strong> @RequestBody annotation → "BODY"<br>
+        <strong>5. Message Resolution:</strong> Using locale-specific messages<br>
+        <strong>6. Context Assembly:</strong> 3 ErrorContext objects created
+    </div>
+    
+    <h4>Final Response:</h4>
+    <div class="code-block">
+```
+
+{
+“title”: “Validation Error”,
+“httpStatus”: 400,
+“context”: [
+{
+“code”: 10002,
+“message”: “Request body field ‘name’ length must be greater than 5 characters”
+},
+{
+“code”: 10103,
+“message”: “Request body field ‘email’ value must be in the expected format”
+},
+{
+“code”: 10100,
+“message”: “Request body field ‘amount’ value must be greater than 0”
+}
+]
+}
+</div>
+</div>
+
+```
+<h3>Example 2: Header + Query Parameter Flow</h3>
+<div class="error-response-example">
+    <h4>Input Request:</h4>
+    <div class="code-block">
+```
+
+GET /api/customers?limit=-5&status=INVALID_STATUS
+X-Customer-ID: [missing required header]
+</div>
+
+```
+    <h4>Flow Execution (Multi-Stage):</h4>
+    <div style="background: #fff8e1; padding: 15px; border-radius: 6px; margin: 10px 0;">
+        <strong>Stage 1 - Header Validation:</strong><br>
+        &nbsp;&nbsp;• MissingRequestHeaderException → code 10001<br>
+        &nbsp;&nbsp;• Location: "HEADER"<br>
+        &nbsp;&nbsp;• Response returned immediately<br><br>
+        
+        <strong>Stage 2 - After header fixed:</strong><br>
+        &nbsp;&nbsp;• Query parameter validation executes<br>
+        &nbsp;&nbsp;• "limit" DecimalMin violation → code 10100<br>
+        &nbsp;&nbsp;• "status" enum parsing failure → code 10104<br>
+        &nbsp;&nbsp;• Location: "QUERY"
+    </div>
+    
+    <h4>Sequential Responses:</h4>
+    <div class="code-block">
+```
+
+// First submission:
+{
+“context”: [{
+“code”: 10001,
+“message”: “Header ‘X-Customer-ID’ must be present”
+}]
+}
+
+// After header added:
+{
+“context”: [
+{
+“code”: 10100,
+“message”: “Query parameter ‘limit’ value must be greater than 0”
+},
+{
+“code”: 10104,
+“message”: “Query parameter ‘status’ value must have the expected value”
+}
+]
+}
+</div>
+</div>
+
+```
+<h3>Example 3: Enum Validation Flow (Current Limitation)</h3>
+<div class="error-response-example">
+    <h4>Input Request:</h4>
+    <div class="code-block">
+```
+
+POST /api/orders
+{
+“status”: “INVALID_STATUS”,  // Bad enum value
+“amount”: -50,               // Below minimum
+“description”: “”            // Empty required field
+}
+</div>
+
+```
+    <h4>Flow Execution:</h4>
+    <div style="background: #fff3cd; padding: 15px; border-radius: 6px; margin: 10px 0;">
+        <strong>1. JSON Deserialization:</strong> Jackson fails on enum parsing<br>
+        <strong>2. Exception Type:</strong> HttpMessageNotReadableException<br>
+        <strong>3. Cause Analysis:</strong> InvalidFormatException with enum target<br>
+        <strong>4. Early Exit:</strong> Bean validation never executes<br>
+        <strong>5. Single Error:</strong> Only enum issue reported
+    </div>
+    
+    <h4>Current Response:</h4>
+    <div class="code-block">
+```
+
+{
+“context”: [{
+“code”: 10104,
+“message”: “Request body field ‘status’ value must have the expected value”
+}]
+}
+// Note: amount and description validations not shown
+</div>
+</div>
+
+```
+<h3>Example 4: Business Validation Flow</h3>
+<div class="error-response-example">
+    <h4>Input Request (Structurally Valid):</h4>
+    <div class="code-block">
+```
+
+POST /api/orders
+{
+“customerId”: “CUST999”,     // Customer doesn’t exist
+“amount”: 15000,             // Exceeds customer limit
+“description”: “Valid order”
+}
+</div>
+
+```
+    <h4>Flow Execution:</h4>
+    <div style="background: #e8f5e8; padding: 15px; border-radius: 6px; margin: 10px 0;">
+        <strong>1. Structural Validation:</strong> Passes (all fields valid)<br>
+        <strong>2. Business Logic Layer:</strong><br>
+        &nbsp;&nbsp;• Customer existence check → fails<br>
+        &nbsp;&nbsp;• Credit limit check → fails<br>
+        <strong>3. Business Exception:</strong> Custom validation exceptions<br>
+        <strong>4. Error Mapping:</strong> Business error codes (11500+)<br>
+        <strong>5. Response Assembly:</strong> Multiple business rule violations
+    </div>
+    
+    <h4>Business Validation Response:</h4>
+    <div class="code-block">
+```
+
+{
+“context”: [
+{
+“code”: 11500,
+“message”: “Customer ID ‘CUST999’ does not exist in our system”
+},
+{
+“code”: 11502,
+“message”: “Transaction amount exceeds daily limit for account ‘CUST999’”
+}
+]
+}
+</div>
+</div>
+
+```
+<div class="validation-layer">
+    <div class="layer-title">Layer 1: Structural Validation</div>
+    <p><strong>Handles:</strong> Field-level constraints from OpenAPI specifications and Bean Validation annotations</p>
+    <p><strong>Examples:</strong> Required fields, string length, numeric ranges, format patterns, enum values</p>
+    <p><strong>Exception Types:</strong> MethodArgumentNotValidException, ConstraintViolationException, HttpMessageNotReadableException</p>
+</div>
+
+<div class="validation-layer">
+    <div class="layer-title">Layer 2: Semantic Validation</div>
+    <p><strong>Handles:</strong> Business logic validation that requires external data verification</p>
+    <p><strong>Examples:</strong> "Customer ID does not exist", "Account is inactive", "Insufficient permissions for resource"</p>
+    <p><strong>Implementation:</strong> Custom validation logic with standardized error code mapping</p>
+</div>
+
+<div class="validation-layer">
+    <div class="layer-title">Layer 3: Error Resolution & Formatting</div>
+    <p><strong>Handles:</strong> Converting all validation failures into consistent business error responses</p>
+    <p><strong>Features:</strong> Location detection, error code mapping, message internationalization, context aggregation</p>
+</div>
+
+<h2>Core Implementation Components</h2>
+
+<h3>ValidationErrorResolver</h3>
+<div class="technical-detail">
+    <p><strong>Purpose:</strong> Central orchestrator that processes multiple exception types and converts them into standardized ErrorContext objects.</p>
+    
+    <p><strong>Key Methods:</strong></p>
+    <ul>
+        <li><code>resolveError(FieldError error, Locale locale)</code> - Processes individual field validation failures</li>
+        <li><code>resolveError(MissingRequestHeaderException exception, Locale locale)</code> - Handles missing required headers</li>
+        <li><code>handleInvalidFormatException(InvalidFormatException ife, Locale locale)</code> - Processes JSON deserialization failures</li>
+    </ul>
+
+    <p><strong>Exception Handling Strategy:</strong></p>
+    <div class="code-block">
+```
+
+private Map<Class<? extends Exception>, BiFunction<Exception, Locale, List<ErrorContext>>> errorHandlers;
+
+// Handles multiple exception types uniformly:
+// - MethodArgumentNotValidException (bean validation failures)
+// - ConstraintViolationException (direct constraint violations)
+// - HttpMessageNotReadableException (JSON parsing/enum failures)
+</div>
+</div>
+
+```
+<h3>Location Detection Implementation</h3>
+<div class="technical-detail">
+    <p><strong>Method:</strong> <code>getLocationFromParameter(Parameter parameter)</code></p>
+    <p><strong>Logic:</strong> Analyzes Spring's Parameter annotations to determine error location:</p>
+    
+    <div class="code-block">
+```
+
+if (parameter.isAnnotationPresent(PathVariable.class)) {
+return ErrorContext.LocationEnum.PATH.toString();
+} else if (parameter.isAnnotationPresent(RequestBody.class)) {
+return ErrorContext.LocationEnum.BODY.toString();
+} else if (parameter.isAnnotationPresent(RequestParam.class)) {
+return ErrorContext.LocationEnum.QUERY.toString();
+} else if (parameter.isAnnotationPresent(RequestHeader.class)) {
+return ErrorContext.LocationEnum.HEADER.toString();
+}
+return ErrorContext.LocationEnum.BODY.toString(); // default
+</div>
+</div>
+
+```
+<h3>Constraint Type Resolution</h3>
+<div class="implementation-box">
+    <p><strong>Implementation:</strong> Direct mapping within ValidationErrorResolver using Spring's FieldError codes</p>
+    
+    <div class="constraint-mapping">
+        <div class="mapping-section">
+            <h4>Constraint Detection Logic</h4>
+            <div class="code-block">
+```
+
+String errorCode = validationProperties.getErrors()
+.getOrDefault(constraintType, “default”);
+
+// Maps Spring constraint codes to business error types
+// Example: “Size.min” → “min-length” → error code 10002
+</div>
+</div>
+<div class="mapping-section">
+<h4>Message Argument Building</h4>
+<div class="code-block">
+String[] messageArgs = messageArgumentsRegistry
+.buildArguments(error, errorType);
+
+// Extracts constraint parameters for messages
+// Example: min=5, max=50 → [“fieldName”, “5”, “50”]
+</div>
+</div>
+</div>
+</div>
+
+```
+<h2>Configuration Implementation</h2>
+
+<h3>ValidationProperties Structure</h3>
+<div class="code-block">
+```
+
+@Data
+@ConfigurationProperties(prefix = “validation”)
+@Configuration
+public class ValidationProperties {
+private Map<String, ErrorConfig> errors;
+private Map<String, String> constraintMappings;
+
+```
+@Data
+public static class ErrorConfig {
+    private String code;
+    private String messageKey;
+}
+```
+
+}
+</div>
+
+```
+<h3>Error Code Mapping Configuration</h3>
+<div class="code-block">
+```
+
+validation:
+errors:
+mandatory:
+code: “10001”
+message-key: “validation.mandatory”
+min-length:
+code: “10002”
+message-key: “validation.length.min”
+decimal-min:
+code: “10100”  
+message-key: “validation.decimal.min”
+# Business validation errors
+resource-not-found:
+code: “11500”
+message-key: “validation.business.resource.missing”
+invalid-status:
+code: “11501”
+message-key: “validation.business.status.invalid”
+constraint-mappings:
+“NotNull”: “mandatory”
+“Size.min”: “min-length”
+“DecimalMin”: “decimal-min”
+</div>
+
+```
+<h3>Complete Error Code Reference</h3>
+<table class="config-table">
+    <thead>
+        <tr>
+            <th>Error Type</th>
+            <th>Code</th>
+            <th>Constraint Examples</th>
+            <th>Usage</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Mandatory Fields</td>
+            <td>10001</td>
+            <td>@NotNull, @NotEmpty, @NotBlank</td>
+            <td>Required field missing or empty</td>
+        </tr>
+        <tr>
+            <td>Length Constraints</td>
+            <td>10002-10003</td>
+            <td>@Size, @Length (min/max)</td>
+            <td>String length validation</td>
+        </tr>
+        <tr>
+            <td>Numeric Constraints</td>
+            <td>10100-10102</td>
+            <td>@DecimalMin, @DecimalMax, @Range</td>
+            <td>Numeric value validation</td>
+        </tr>
+        <tr>
+            <td>Format Validation</td>
+            <td>10103</td>
+            <td>@Pattern, @Email</td>
+            <td>Format/regex validation</td>
+        </tr>
+        <tr>
+            <td>Value Validation</td>
+            <td>10104</td>
+            <td>@ValueOfEnum, enum parsing</td>
+            <td>Invalid enum or value</td>
+        </tr>
+        <tr>
+            <td>Business Rules</td>
+            <td>11500+</td>
+            <td>Custom semantic validation</td>
+            <td>Resource existence, business logic</td>
+        </tr>
+    </tbody>
+</table>
+
+<h2>Semantic & Business Validation Integration</h2>
+<div class="implementation-box">
+    <h3>Business Validation Implementation</h3>
+    <p>The framework extends beyond structural validation to handle semantic business rules:</p>
+    
+    <div class="code-block">
+```
+
+// Example: Customer ID validation
+@Component
+public class CustomerValidationService {
+
+```
+public void validateCustomerExists(String customerId, Locale locale) {
+    if (!customerRepository.existsById(customerId)) {
+        throw new BusinessValidationException(
+            ErrorContext.builder()
+                .code(11500)
+                .message(messageSource.getMessage(
+                    "validation.business.customer.notfound", 
+                    new Object[]{customerId}, 
+                    locale))
+                .build()
+        );
+    }
+}
+```
+
+}
+</div>
+
+```
+    <h3>Business Error Examples</h3>
+    <ul>
+        <li><strong>11500:</strong> "Customer ID {0} does not exist in our system"</li>
+        <li><strong>11501:</strong> "Account status {0} is not valid for this operation"</li>
+        <li><strong>11502:</strong> "Transaction amount exceeds daily limit for account {0}"</li>
+        <li><strong>11503:</strong> "Resource {0} is not accessible with current permissions"</li>
+    </ul>
+</div>
+
+<h2>Error Response Format</h2>
+<div class="error-response-example">
+    <h3>Standard Response Structure</h3>
+    <div class="code-block">
+```
+
+{
+“title”: “Validation Error”,
+“httpStatus”: 400,
+“traceId”: “abc123def456”,
+“requestId”: “req-789012”,
+“context”: [
+{
+“code”: 10002,
+“message”: “Request body field ‘customerName’ length must be greater than 5 characters”
+},
+{
+“code”: 11500,
+“message”: “Customer ID ‘CUST123’ does not exist in our system”
+}
+]
+}
+</div>
+
+```
+    <h3>Location-Specific Examples</h3>
+    <div class="code-block">
+```
+
+// Header validation error
+{
+“code”: 10001,
+“message”: “Header ‘X-Customer-ID’ must be present”
+}
+
+// Query parameter error  
+{
+“code”: 10100,
+“message”: “Query parameter ‘limit’ value must be greater than 0”
+}
+
+// Request body constraint
+{
+“code”: 10003,
+“message”: “Request body field ‘description’ length must be lower than 500 characters”
+}
+</div>
+</div>
+
+```
+<h2>Implementation Limitations & Current Behavior</h2>
+
+<div class="known-issue">
+    <h3>Enum Validation Sequencing</h3>
+    <p><strong>Current Behavior:</strong> HttpMessageNotReadableException during JSON deserialization prevents other bean validations from executing when invalid enum values are provided.</p>
+    <p><strong>Impact:</strong> Single-error response for enum violations, requiring multiple submission rounds to see all validation issues.</p>
+    <p><strong>Technical Root Cause:</strong> Jackson deserialization failure occurs before Spring bean validation framework executes.</p>
+</div>
+
+<div class="known-issue">
+    <h3>Multi-Layer Validation Execution</h3>
+    <p><strong>Current Behavior:</strong> Header validation and body constraint violations execute in different Spring framework phases and cannot be aggregated.</p>
+    <p><strong>Impact:</strong> Sequential error discovery when validation spans multiple request components (headers + body content).</p>
+    <p><strong>Technical Root Cause:</strong> Spring's request processing pipeline validates headers before method parameter binding.</p>
+</div>
+
+<div class="known-issue">
+    <h3>Exception Type Unpredictability</h3>
+    <p><strong>Current Behavior:</strong> ConstraintViolationException vs MethodArgumentNotValidException thrown inconsistently for similar validation scenarios.</p>
+    <p><strong>Implementation Response:</strong> Unified handling through common exception processing methods.</p>
+    <p><strong>Technical Note:</strong> Both exception types processed identically through the ErrorResolver.</p>
+</div>
+
+<h2>OpenAPI Integration Details</h2>
+<div class="technical-detail">
+    <h3>Code Generation Integration</h3>
+    <p>The framework automatically leverages constraints defined in OpenAPI specifications through the code generation process:</p>
+    
+    <div class="code-block">
+```
+
+# OpenAPI Specification
+
+CustomerRequest:
+required: [name, email]
+properties:
+name:
+type: string
+minLength: 5
+maxLength: 50
+email:
+type: string
+format: email
+amount:
+type: number
+minimum: 0
+maximum: 10000
+
+# Generated Java Model
+
+public class CustomerRequest {
+@NotNull
+@Size(min = 5, max = 50)
+private String name;
+
+```
+@NotNull
+@Email
+private String email;
+
+@DecimalMin("0")
+@DecimalMax("10000")
+private BigDecimal amount;
+```
+
+}
+</div>
+
+```
+    <p><strong>Automatic Mapping:</strong> ValidationErrorResolver translates generated constraint violations into appropriate business error codes without additional configuration.</p>
+</div>
+
+<h2>Message Internationalization Implementation</h2>
+<div class="implementation-box">
+    <h3>Message Properties Structure</h3>
+    <div class="code-block">
+```
+
+# messages.properties (English)
+
+validation.mandatory={0} must be present
+validation.length.min={0} length must be greater than {1} characters
+validation.decimal.min={0} value must be greater than {1}
+validation.business.customer.notfound=Customer ID {0} does not exist
+
+# messages_es.properties (Spanish)
+
+validation.mandatory={0} debe estar presente
+validation.length.min={0} longitud debe ser mayor que {1} caracteres
+validation.decimal.min={0} valor debe ser mayor que {1}
+validation.business.customer.notfound=ID de cliente {0} no existe
+</div>
+
+```
+    <h3>Locale Detection</h3>
+    <p>Framework uses Spring's LocaleResolver to determine message language from:</p>
+    <ul>
+        <li>Accept-Language header</li>
+        <li>Locale query parameter</li>
+        <li>Default application locale</li>
+    </ul>
+</div>
+
+<h2>Performance & Scalability Considerations</h2>
+<div class="technical-detail">
+    <h3>Current Implementation Characteristics</h3>
+    <ul>
+        <li><strong>Error Handler Registration:</strong> Uses @PostConstruct for one-time Map initialization</li>
+        <li><strong>Message Resolution:</strong> Leverages Spring's MessageSource caching mechanism</li>
+        <li><strong>Constraint Mapping:</strong> In-memory HashMap lookups for constraint type resolution</li>
+        <li><strong>Exception Processing:</strong> Stream-based aggregation for multiple field errors</li>
+    </ul>
+
+    <h3>Memory & Processing Impact</h3>
+    <ul>
+        <li>Minimal overhead - error processing only occurs during validation failures</li>
+        <li>No persistent state maintained between requests</li>
+        <li>Configuration maps loaded once at application startup</li>
+        <li>Message formatting delegated to Spring's optimized MessageSource</li>
+    </ul>
+</div>
+
+<div class="implementation-box" style="margin-top: 40px;">
+    <h3>Implementation Reference Summary</h3>
+    <p>This validation framework provides comprehensive error handling across structural, semantic, and business validation layers with location-aware error reporting and internationalization support. The implementation handles multiple Spring exception types uniformly while maintaining extensibility for business-specific validation requirements.</p>
+    
+    <p><strong>Key Implementation Files:</strong></p>
+    <ul>
+        <li><code>ValidationErrorResolver.java</code> - Core error processing logic</li>
+        <li><code>ValidationProperties.java</code> - Configuration binding</li>
+        <li><code>validation-error-config.yml</code> - Error code mappings</li>
+        <li><code>messages.properties</code> - Internationalized error messages</li>
+    </ul>
+</div>
+```
+
+</body>
+</html>
