@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virtual Card System Monitor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #cbd5e1 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #334155;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 2.8rem;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #06b6d4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            color: #64748b;
+            font-weight: 300;
+        }
+
+        .dashboard {
+            max-width: 1500px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(16px);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+        }
+
+        .flow-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 50px 0;
+            flex-wrap: wrap;
+            gap: 25px;
+        }
+
+        .component {
+            position: relative;
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(51, 65, 85, 0.6) 100%);
+            border-radius: 20px;
+            padding: 30px 20px;
+            text-align: center;
+            min-width: 200px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid rgba(71, 85, 105, 0.5);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .component::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .component:hover::before {
+            left: 100%;
+        }
+
+        .component:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            border-color: rgba(156, 163, 175, 0.8);
+        }
+
+        .component.healthy {
+            border-color: #10b981;
+            box-shadow: 0 0 30px rgba(16, 185, 129, 0.3);
+        }
+
+        .component.warning {
+            border-color: #f59e0b;
+            box-shadow: 0 0 30px rgba(245, 158, 11, 0.3);
+        }
+
+        .component.error {
+            border-color: #ef4444;
+            box-shadow: 0 0 30px rgba(239, 68, 68, 0.4);
+            animation: pulse-error 2s infinite;
+        }
+
+        @keyframes pulse-error {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .component h3 {
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+            font-weight: 600;
+            color: #f1f5f9;
+        }
+
+        .status-indicator {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            margin: 15px auto;
+            position: relative;
+        }
+
+        .status-indicator.healthy {
+            background: linear-gradient(135deg, #10b981, #059669);
+            animation: pulse-green 2s infinite;
+        }
+
+        .status-indicator.warning {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            animation: pulse-orange 2s infinite;
+        }
+
+        .status-indicator.error {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            animation: pulse-red 1s infinite;
+        }
+
+        @keyframes pulse-green {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            50% { box-shadow: 0 0 0 15px rgba(16, 185, 129, 0); }
+        }
+
+        @keyframes pulse-orange {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); }
+            50% { box-shadow: 0 0 0 15px rgba(245, 158, 11, 0); }
+        }
+
+        @keyframes pulse-red {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            50% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
+        }
+
+        .arrow {
+            font-size: 2.5rem;
+            color: #64748b;
+            align-self: center;
+            transition: all 0.3s ease;
+        }
+
+        .arrow:hover {
+            color: #94a3b8;
+            transform: scale(1.2);
+        }
+
+        .provider-routing {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            margin: 0 20px;
+        }
+
+        .routing-arrow {
+            font-size: 1.5rem;
+            color: #64748b;
+        }
+
+        .destination-group {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .destination {
+            background: linear-gradient(135deg, rgba(45, 55, 72, 0.8) 0%, rgba(74, 85, 104, 0.6) 100%);
+            border-radius: 15px;
+            padding: 20px 15px;
+            text-align: center;
+            min-width: 150px;
+            border: 2px solid rgba(71, 85, 105, 0.5);
+            transition: all 0.3s ease;
+        }
+
+        .destination.healthy {
+            border-color: #10b981;
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.2);
+        }
+
+        .destination.warning {
+            border-color: #f59e0b;
+            box-shadow: 0 0 20px rgba(245, 158, 11, 0.2);
+        }
+
+        .destination.error {
+            border-color: #ef4444;
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.2);
+        }
+
+        .destination h4 {
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            color: #f1f5f9;
+        }
+
+        .destination .card-type {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            margin-bottom: 10px;
+        }
+
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-top: 40px;
+        }
+
+        .metric-card {
+            background: linear-gradient(135deg, rgba(248, 250, 252, 0.9) 0%, rgba(241, 245, 249, 0.8) 100%);
+            border-radius: 16px;
+            padding: 25px;
+            text-align: center;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .metric-card h4 {
+            font-size: 1rem;
+            color: #64748b;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .metric-card .value {
+            font-size: 2.2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .controls {
+            margin-top: 40px;
+            text-align: center;
+        }
+
+        .controls h3 {
+            margin-bottom: 20px;
+            color: #f1f5f9;
+            font-size: 1.3rem;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.8) 0%, rgba(139, 92, 246, 0.8) 100%);
+            border: 1px solid rgba(99, 102, 241, 0.4);
+            color: white;
+            padding: 12px 24px;
+            margin: 8px;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .btn:hover {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 1) 0%, rgba(139, 92, 246, 1) 100%);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn.reset {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.8) 0%, rgba(5, 150, 105, 0.8) 100%);
+            border-color: rgba(16, 185, 129, 0.4);
+        }
+
+        .btn.reset:hover {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 1) 0%, rgba(5, 150, 105, 1) 100%);
+            box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3);
+        }
+
+        .status-text {
+            font-size: 1rem;
+            margin-top: 8px;
+            color: #cbd5e1;
+            font-weight: 500;
+        }
+
+        .metric-text {
+            font-size: 0.85rem;
+            margin-top: 8px;
+            color: #94a3b8;
+        }
+
+        .timestamp {
+            text-align: center;
+            margin-top: 30px;
+            color: #64748b;
+            font-size: 0.95rem;
+            font-weight: 300;
+        }
+
+        .alert-banner {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 38, 0.1) 100%);
+            border: 1px solid #ef4444;
+            border-radius: 12px;
+            padding: 18px;
+            margin-bottom: 25px;
+            text-align: center;
+            display: none;
+            backdrop-filter: blur(8px);
+            color: #dc2626;
+        }
+
+        .alert-banner.show {
+            display: block;
+            animation: slideDown 0.4s ease;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 1200px) {
+            .flow-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .arrow {
+                transform: rotate(90deg);
+                margin: 10px 0;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2.2rem;
+            }
+            
+            .component {
+                min-width: 160px;
+                padding: 25px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>⚡ Virtual Card System Monitor</h1>
+        <p>Real-time health monitoring across your payment infrastructure</p>
+    </div>
+
+    <div class="dashboard">
+        <div class="alert-banner" id="alertBanner">
+            <strong>🚨 System Alert:</strong> <span id="alertMessage"></span>
+        </div>
+
+        <div class="flow-container">
+            <div class="component healthy" id="psaas" data-component="psaas">
+                <h3>PSaaS Layer</h3>
+                <div class="status-indicator healthy"></div>
+                <div class="status-text">Active</div>
+                <div class="metric-text">Load: 23%</div>
+            </div>
+
+            <div class="arrow">→</div>
+
+            <div class="component healthy" id="apache" data-component="apache">
+                <h3>Apache</h3>
+                <div class="status-indicator healthy"></div>
+                <div class="status-text">Running</div>
+                <div class="metric-text">Uptime: 99.9%</div>
+            </div>
+
+            <div class="arrow">→</div>
+
+            <div class="component healthy" id="tomcat" data-component="tomcat">
+                <h3>Tomcat</h3>
+                <div class="status-indicator healthy"></div>
+                <div class="status-text">Operational</div>
+                <div class="metric-text">Threads: 150/200</div>
+            </div>
+
+            <div class="arrow">→</div>
+
+            <div class="component healthy" id="aws" data-component="aws">
+                <h3>AWS API</h3>
+                <div class="status-indicator healthy"></div>
+                <div class="status-text">Available</div>
+                <div class="metric-text">Region: us-east-1</div>
+            </div>
+
+            <div class="arrow">→</div>
+
+            <div class="component healthy" id="provider" data-component="provider">
+                <h3>Provider</h3>
+                <div class="status-indicator healthy"></div>
+                <div class="status-text">Routing</div>
+                <div class="metric-text">Smart Router</div>
+            </div>
+
+            <div class="arrow">→</div>
+
+            <div class="component healthy" id="tsys" data-component="tsys">
+                <h3>TSYS</h3>
+                <div class="status-indicator healthy"></div>
+                <div class="status-text">Connected</div>
+                <div class="metric-text">Latency: 120ms</div>
+            </div>
+        </div>
+        </div>
+
+        <div class="metrics">
+            <div class="metric-card">
+                <h4>Total Requests/min</h4>
+                <div class="value" id="requestsPerMin">1,247</div>
+            </div>
+            <div class="metric-card">
+                <h4>Success Rate</h4>
+                <div class="value" id="successRate">99.2%</div>
+            </div>
+            <div class="metric-card">
+                <h4>Avg Response Time</h4>
+                <div class="value" id="avgResponseTime">245ms</div>
+            </div>
+            <div class="metric-card">
+                <h4>Active Sessions</h4>
+                <div class="value" id="activeSessions">3,456</div>
+            </div>
+            <div class="metric-card">
+                <h4>Visa Transactions</h4>
+                <div class="value" id="visaTransactions">728</div>
+            </div>
+            <div class="metric-card">
+                <h4>MC Transactions</h4>
+                <div class="value" id="mcTransactions">519</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <h3>System Testing Controls</h3>
+            <button class="btn" onclick="simulateIssue('apache', 'error')">Apache Down</button>
+            <button class="btn" onclick="simulateIssue('tomcat', 'warning')">Tomcat Warning</button>
+            <button class="btn" onclick="simulateIssue('aws', 'error')">AWS API Error</button>
+            <button class="btn" onclick="simulateIssue('provider', 'warning')">Provider Slow</button>
+            <button class="btn" onclick="simulateIssue('tsys', 'error')">TSYS Down</button>
+            <button class="btn reset" onclick="resetAll()">Reset All Systems</button>
+        </div>
+
+        <div class="timestamp" id="timestamp">
+            Last updated: <span id="lastUpdate"></span>
+        </div>
+    </div>
+
+    <script>
+        // Component status management
+        const components = {
+            psaas: { name: 'PSaaS Layer', status: 'healthy', details: 'Active', metric: 'Load: 23%' },
+            apache: { name: 'Apache', status: 'healthy', details: 'Running', metric: 'Uptime: 99.9%' },
+            tomcat: { name: 'Tomcat', status: 'healthy', details: 'Operational', metric: 'Threads: 150/200' },
+            aws: { name: 'AWS API', status: 'healthy', details: 'Available', metric: 'Region: us-east-1' },
+            provider: { name: 'Provider', status: 'healthy', details: 'Routing', metric: 'Smart Router' },
+            tsys: { name: 'TSYS', status: 'healthy', details: 'Connected', metric: 'Latency: 120ms' }
+        };
+
+        // Error scenarios
+        const errorScenarios = {
+            apache: {
+                error: { details: 'Service Down', metric: 'Error 503', message: 'Apache server is not responding. Check server status and restart if needed.' },
+                warning: { details: 'High Load', metric: 'CPU: 89%', message: 'Apache server experiencing high load. Consider scaling or load balancing.' }
+            },
+            tomcat: {
+                error: { details: 'Gateway Error', metric: 'Conn Failed', message: 'Tomcat/API Gateway connection failed. Check gateway configuration.' },
+                warning: { details: 'Memory Warning', metric: 'Threads: 190/200', message: 'Tomcat approaching thread limit. Monitor for potential bottlenecks.' }
+            },
+            aws: {
+                error: { details: 'API Unavailable', metric: 'Status: 500', message: 'AWS API service is experiencing issues. Check AWS status page.' },
+                warning: { details: 'Rate Limited', metric: 'Throttling', message: 'AWS API requests being throttled. Review rate limits.' }
+            },
+            provider: {
+                error: { details: 'Router Down', metric: 'No Routes', message: 'Provider service routing failed. Check routing configuration.' },
+                warning: { details: 'Slow Routing', metric: 'Delay: 2.1s', message: 'Provider service experiencing routing delays.' }
+            },
+            tsys: {
+                error: { details: 'Connection Lost', metric: 'Timeout', message: 'TSYS connection has timed out. Visa transactions affected.' },
+                warning: { details: 'Slow Response', metric: 'Latency: 2.5s', message: 'TSYS experiencing high latency. Visa processing may be delayed.' }
+            },
+            mp: {
+                error: { details: 'MP Offline', metric: 'No Response', message: 'Mastercard MP service is offline. MC transactions affected.' },
+                warning: { details: 'High Latency', metric: 'Latency: 1.8s', message: 'MP experiencing high latency. MC processing may be slower.' }
+            }
+        };
+
+        function updateComponent(componentId, status, details, metric) {
+            const isDestination = componentId === 'tsys' || componentId === 'mp';
+            const element = document.getElementById(componentId);
+            const indicator = element.querySelector('.status-indicator');
+            const statusText = element.querySelector('.status-text');
+            const metricText = element.querySelector(isDestination ? '.metric-text' : 'div:last-child');
+
+            // Remove all status classes
+            element.classList.remove('healthy', 'warning', 'error');
+            indicator.classList.remove('healthy', 'warning', 'error');
+
+            // Add new status
+            element.classList.add(status);
+            indicator.classList.add(status);
+            
+            statusText.textContent = details;
+            metricText.textContent = metric;
+
+            components[componentId].status = status;
+            components[componentId].details = details;
+            components[componentId].metric = metric;
+        }
+
+        function simulateIssue(componentId, severity) {
+            const scenario = errorScenarios[componentId][severity];
+            if (scenario) {
+                updateComponent(componentId, severity, scenario.details, scenario.metric);
+                showAlert(scenario.message);
+                
+                // Update metrics to reflect the issue
+                if (severity === 'error') {
+                    document.getElementById('successRate').textContent = '87.3%';
+                    document.getElementById('avgResponseTime').textContent = '1,247ms';
+                    
+                    if (componentId === 'tsys') {
+                        document.getElementById('visaTransactions').textContent = '0';
+                    } else if (componentId === 'mp') {
+                        document.getElementById('mcTransactions').textContent = '0';
+                    }
+                } else if (severity === 'warning') {
+                    document.getElementById('successRate').textContent = '94.1%';
+                    document.getElementById('avgResponseTime').textContent = '456ms';
+                }
+            }
+        }
+
+        function resetAll() {
+            Object.keys(components).forEach(componentId => {
+                const comp = components[componentId];
+                updateComponent(componentId, 'healthy', comp.details, comp.metric);
+            });
+            
+            // Reset original values
+            document.getElementById('successRate').textContent = '99.2%';
+            document.getElementById('avgResponseTime').textContent = '245ms';
+            document.getElementById('visaTransactions').textContent = '728';
+            document.getElementById('mcTransactions').textContent = '519';
+            
+            hideAlert();
+        }
+
+        function showAlert(message) {
+            const alertBanner = document.getElementById('alertBanner');
+            const alertMessage = document.getElementById('alertMessage');
+            alertMessage.textContent = message;
+            alertBanner.classList.add('show');
+        }
+
+        function hideAlert() {
+            const alertBanner = document.getElementById('alertBanner');
+            alertBanner.classList.remove('show');
+        }
+
+        function updateTimestamp() {
+            const now = new Date();
+            document.getElementById('lastUpdate').textContent = now.toLocaleTimeString();
+        }
+
+        function simulateRealTimeData() {
+            // Simulate changing metrics
+            const requests = Math.floor(Math.random() * 200) + 1200;
+            const sessions = Math.floor(Math.random() * 500) + 3200;
+            const visaTxn = Math.floor(Math.random() * 100) + 680;
+            const mcTxn = Math.floor(Math.random() * 80) + 480;
+            
+            document.getElementById('requestsPerMin').textContent = requests.toLocaleString();
+            document.getElementById('activeSessions').textContent = sessions.toLocaleString();
+            
+            // Only update if systems are healthy
+            if (components.tsys.status === 'healthy') {
+                document.getElementById('visaTransactions').textContent = visaTxn.toLocaleString();
+            }
+            if (components.mp.status === 'healthy') {
+                document.getElementById('mcTransactions').textContent = mcTxn.toLocaleString();
+            }
+        }
+
+        // Add click handlers for components to show detailed info
+        document.querySelectorAll('.component, .destination').forEach(element => {
+            element.addEventListener('click', () => {
+                const componentId = element.getAttribute('data-component') || element.getAttribute('data-destination');
+                const comp = components[componentId];
+                alert(`${comp.name}\nStatus: ${comp.status.toUpperCase()}\nDetails: ${comp.details}\nMetric: ${comp.metric}`);
+            });
+        });
+
+        // Initialize and start real-time updates
+        updateTimestamp();
+        setInterval(updateTimestamp, 1000);
+        setInterval(simulateRealTimeData, 5000);
+
+        // Initial data simulation
+        simulateRealTimeData();
+    </script>
+</body>
+</html>
