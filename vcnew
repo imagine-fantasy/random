@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virtual Card System Monitor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+```
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        min-height: 100vh;
+        padding: 20px;
+        color: white;
+    }
+
+    .header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .header h1 {
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .header p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+    }
+
+    .dashboard {
+        max-width: 1400px;
+        margin: 0 auto;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    }
+
+    .flow-container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin: 40px 0;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    .component {
+        position: relative;
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 15px;
+        padding: 25px;
+        text-align: center;
+        min-width: 180px;
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+        cursor: pointer;
+    }
+
+    .component:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+
+    .component.healthy {
+        border-color: #4CAF50;
+        box-shadow: 0 0 20px rgba(76, 175, 80, 0.3);
+    }
+
+    .component.warning {
+        border-color: #FF9800;
+        box-shadow: 0 0 20px rgba(255, 152, 0, 0.3);
+    }
+
+    .component.error {
+        border-color: #f44336;
+        box-shadow: 0 0 20px rgba(244, 67, 54, 0.3);
+        animation: pulse-error 2s infinite;
+    }
+
+    @keyframes pulse-error {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+
+    .component h3 {
+        font-size: 1.2rem;
+        margin-bottom: 10px;
+    }
+
+    .status-indicator {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        margin: 10px auto;
+        position: relative;
+    }
+
+    .status-indicator.healthy {
+        background: #4CAF50;
+        animation: pulse-green 2s infinite;
+    }
+
+    .status-indicator.warning {
+        background: #FF9800;
+        animation: pulse-orange 2s infinite;
+    }
+
+    .status-indicator.error {
+        background: #f44336;
+        animation: pulse-red 1s infinite;
+    }
+
+    @keyframes pulse-green {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7); }
+        50% { box-shadow: 0 0 0 10px rgba(76, 175, 80, 0); }
+    }
+
+    @keyframes pulse-orange {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(255, 152, 0, 0.7); }
+        50% { box-shadow: 0 0 0 10px rgba(255, 152, 0, 0); }
+    }
+
+    @keyframes pulse-red {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(244, 67, 54, 0.7); }
+        50% { box-shadow: 0 0 0 10px rgba(244, 67, 54, 0); }
+    }
+
+    .arrow {
+        font-size: 2rem;
+        color: rgba(255, 255, 255, 0.7);
+        align-self: center;
+    }
+
+    .metrics {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-top: 30px;
+    }
+
+    .metric-card {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        padding: 20px;
+        text-align: center;
+    }
+
+    .metric-card h4 {
+        font-size: 0.9rem;
+        opacity: 0.8;
+        margin-bottom: 5px;
+    }
+
+    .metric-card .value {
+        font-size: 1.8rem;
+        font-weight: bold;
+    }
+
+    .controls {
+        margin-top: 30px;
+        text-align: center;
+    }
+
+    .btn {
+        background: rgba(255, 255, 255, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: white;
+        padding: 10px 20px;
+        margin: 5px;
+        border-radius: 25px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: translateY(-2px);
+    }
+
+    .status-text {
+        font-size: 0.9rem;
+        margin-top: 5px;
+        opacity: 0.9;
+    }
+
+    .timestamp {
+        text-align: center;
+        margin-top: 20px;
+        opacity: 0.7;
+        font-size: 0.9rem;
+    }
+
+    .alert-banner {
+        background: rgba(244, 67, 54, 0.2);
+        border: 1px solid #f44336;
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 20px;
+        text-align: center;
+        display: none;
+    }
+
+    .alert-banner.show {
+        display: block;
+        animation: slideDown 0.3s ease;
+    }
+
+    @keyframes slideDown {
+        from { opacity: 0; transform: translateY(-20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 768px) {
+        .flow-container {
+            flex-direction: column;
+        }
+        
+        .arrow {
+            transform: rotate(90deg);
+        }
+    }
+</style>
+```
+
+</head>
+<body>
+    <div class="header">
+        <h1>🎯 Virtual Card System Monitor</h1>
+        <p>Real-time health monitoring across the entire payment pipeline</p>
+    </div>
+
+```
+<div class="dashboard">
+    <div class="alert-banner" id="alertBanner">
+        <strong>⚠️ System Alert:</strong> <span id="alertMessage"></span>
+    </div>
+
+    <div class="flow-container">
+        <div class="component healthy" id="client" data-component="client">
+            <h3>Client</h3>
+            <div class="status-indicator healthy"></div>
+            <div class="status-text">Connected</div>
+            <div style="font-size: 0.8rem; margin-top: 5px;">Response: 45ms</div>
+        </div>
+
+        <div class="arrow">→</div>
+
+        <div class="component healthy" id="psaas" data-component="psaas">
+            <h3>PSaaS Layer</h3>
+            <div class="status-indicator healthy"></div>
+            <div class="status-text">Active</div>
+            <div style="font-size: 0.8rem; margin-top: 5px;">Load: 23%</div>
+        </div>
+
+        <div class="arrow">→</div>
+
+        <div class="component healthy" id="apache" data-component="apache">
+            <h3>Apache</h3>
+            <div class="status-indicator healthy"></div>
+            <div class="status-text">Running</div>
+            <div style="font-size: 0.8rem; margin-top: 5px;">Uptime: 99.9%</div>
+        </div>
+
+        <div class="arrow">→</div>
+
+        <div class="component healthy" id="tomcat" data-component="tomcat">
+            <h3>Tomcat/API Gateway</h3>
+            <div class="status-indicator healthy"></div>
+            <div class="status-text">Operational</div>
+            <div style="font-size: 0.8rem; margin-top: 5px;">Threads: 150/200</div>
+        </div>
+
+        <div class="arrow">→</div>
+
+        <div class="component healthy" id="aws" data-component="aws">
+            <h3>AWS API</h3>
+            <div class="status-indicator healthy"></div>
+            <div class="status-text">Available</div>
+            <div style="font-size: 0.8rem; margin-top: 5px;">Region: us-east-1</div>
+        </div>
+
+        <div class="arrow">→</div>
+
+        <div class="component healthy" id="tsys" data-component="tsys">
+            <h3>Tsys/MP</h3>
+            <div class="status-indicator healthy"></div>
+            <div class="status-text">Connected</div>
+            <div style="font-size: 0.8rem; margin-top: 5px;">Latency: 120ms</div>
+        </div>
+    </div>
+
+    <div class="metrics">
+        <div class="metric-card">
+            <h4>Total Requests/min</h4>
+            <div class="value" id="requestsPerMin">1,247</div>
+        </div>
+        <div class="metric-card">
+            <h4>Success Rate</h4>
+            <div class="value" id="successRate">99.2%</div>
+        </div>
+        <div class="metric-card">
+            <h4>Avg Response Time</h4>
+            <div class="value" id="avgResponseTime">245ms</div>
+        </div>
+        <div class="metric-card">
+            <h4>Active Sessions</h4>
+            <div class="value" id="activeSessions">3,456</div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <h3 style="margin-bottom: 15px;">Simulate Issues (for testing):</h3>
+        <button class="btn" onclick="simulateIssue('apache', 'error')">Apache Down</button>
+        <button class="btn" onclick="simulateIssue('tomcat', 'warning')">Tomcat Warning</button>
+        <button class="btn" onclick="simulateIssue('aws', 'error')">AWS API Error</button>
+        <button class="btn" onclick="simulateIssue('tsys', 'warning')">Tsys Slow</button>
+        <button class="btn" onclick="resetAll()">Reset All</button>
+    </div>
+
+    <div class="timestamp" id="timestamp">
+        Last updated: <span id="lastUpdate"></span>
+    </div>
+</div>
+
+<script>
+    // Component status management
+    const components = {
+        client: { name: 'Client', status: 'healthy', details: 'Connected', metric: 'Response: 45ms' },
+        psaas: { name: 'PSaaS Layer', status: 'healthy', details: 'Active', metric: 'Load: 23%' },
+        apache: { name: 'Apache', status: 'healthy', details: 'Running', metric: 'Uptime: 99.9%' },
+        tomcat: { name: 'Tomcat/API Gateway', status: 'healthy', details: 'Operational', metric: 'Threads: 150/200' },
+        aws: { name: 'AWS API', status: 'healthy', details: 'Available', metric: 'Region: us-east-1' },
+        tsys: { name: 'Tsys/MP', status: 'healthy', details: 'Connected', metric: 'Latency: 120ms' }
+    };
+
+    // Error scenarios
+    const errorScenarios = {
+        apache: {
+            error: { details: 'Service Down', metric: 'Error 503', message: 'Apache server is not responding. Check server status.' },
+            warning: { details: 'High Load', metric: 'CPU: 89%', message: 'Apache server experiencing high load.' }
+        },
+        tomcat: {
+            error: { details: 'Gateway Error', metric: 'Conn Failed', message: 'Tomcat/API Gateway connection failed.' },
+            warning: { details: 'Memory Warning', metric: 'Threads: 190/200', message: 'Tomcat approaching thread limit.' }
+        },
+        aws: {
+            error: { details: 'API Unavailable', metric: 'Status: 500', message: 'AWS API service is experiencing issues.' },
+            warning: { details: 'Rate Limited', metric: 'Throttling', message: 'AWS API requests being throttled.' }
+        },
+        tsys: {
+            error: { details: 'Connection Lost', metric: 'Timeout', message: 'Tsys/MP connection has timed out.' },
+            warning: { details: 'Slow Response', metric: 'Latency: 2.5s', message: 'Tsys/MP experiencing high latency.' }
+        }
+    };
+
+    function updateComponent(componentId, status, details, metric) {
+        const component = document.getElementById(componentId);
+        const indicator = component.querySelector('.status-indicator');
+        const statusText = component.querySelector('.status-text');
+        const metricText = component.querySelector('div:last-child');
+
+        // Remove all status classes
+        component.classList.remove('healthy', 'warning', 'error');
+        indicator.classList.remove('healthy', 'warning', 'error');
+
+        // Add new status
+        component.classList.add(status);
+        indicator.classList.add(status);
+        
+        statusText.textContent = details;
+        metricText.textContent = metric;
+
+        components[componentId].status = status;
+        components[componentId].details = details;
+        components[componentId].metric = metric;
+    }
+
+    function simulateIssue(componentId, severity) {
+        const scenario = errorScenarios[componentId][severity];
+        if (scenario) {
+            updateComponent(componentId, severity, scenario.details, scenario.metric);
+            showAlert(scenario.message);
+            
+            // Update metrics to reflect the issue
+            if (severity === 'error') {
+                document.getElementById('successRate').textContent = '87.3%';
+                document.getElementById('avgResponseTime').textContent = '1,247ms';
+            } else if (severity === 'warning') {
+                document.getElementById('successRate').textContent = '94.1%';
+                document.getElementById('avgResponseTime').textContent = '456ms';
+            }
+        }
+    }
+
+    function resetAll() {
+        Object.keys(components).forEach(componentId => {
+            const comp = components[componentId];
+            updateComponent(componentId, 'healthy', comp.details, comp.metric);
+        });
+        
+        // Reset original values
+        document.getElementById('successRate').textContent = '99.2%';
+        document.getElementById('avgResponseTime').textContent = '245ms';
+        
+        hideAlert();
+    }
+
+    function showAlert(message) {
+        const alertBanner = document.getElementById('alertBanner');
+        const alertMessage = document.getElementById('alertMessage');
+        alertMessage.textContent = message;
+        alertBanner.classList.add('show');
+    }
+
+    function hideAlert() {
+        const alertBanner = document.getElementById('alertBanner');
+        alertBanner.classList.remove('show');
+    }
+
+    function updateTimestamp() {
+        const now = new Date();
+        document.getElementById('lastUpdate').textContent = now.toLocaleTimeString();
+    }
+
+    function simulateRealTimeData() {
+        // Simulate changing metrics
+        const requests = Math.floor(Math.random() * 200) + 1200;
+        const sessions = Math.floor(Math.random() * 500) + 3200;
+        
+        document.getElementById('requestsPerMin').textContent = requests.toLocaleString();
+        document.getElementById('activeSessions').textContent = sessions.toLocaleString();
+    }
+
+    // Add click handlers for components to show detailed info
+    document.querySelectorAll('.component').forEach(component => {
+        component.addEventListener('click', () => {
+            const componentId = component.getAttribute('data-component');
+            const comp = components[componentId];
+            alert(`${comp.name}\nStatus: ${comp.status}\nDetails: ${comp.details}\nMetric: ${comp.metric}`);
+        });
+    });
+
+    // Initialize and start real-time updates
+    updateTimestamp();
+    setInterval(updateTimestamp, 1000);
+    setInterval(simulateRealTimeData, 5000);
+
+    // Initial data simulation
+    simulateRealTimeData();
+</script>
+```
+
+</body>
+</html>
