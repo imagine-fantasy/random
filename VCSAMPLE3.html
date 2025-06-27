@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virtual Card System Monitor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            line-height: 1.4;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: white;
+            border-bottom: 1px solid #e1e5e9;
+            padding: 20px 30px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: none;
+            margin: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1a73e8;
+        }
+
+        .header-tabs {
+            display: flex;
+            gap: 30px;
+        }
+
+        .tab {
+            padding: 8px 0;
+            color: #5f6368;
+            text-decoration: none;
+            border-bottom: 2px solid transparent;
+            font-weight: 500;
+        }
+
+        .tab.active {
+            color: #1a73e8;
+            border-bottom-color: #1a73e8;
+        }
+
+        .container {
+            padding: 0;
+            width: 100%;
+            max-width: none;
+        }
+
+        .filter-section {
+            background: white;
+            padding: 15px 30px;
+            border-bottom: 1px solid #e1e5e9;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .filter-label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .flow-section {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            padding: 40px 20px;
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .system-flow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            width: 100%;
+            max-width: 1600px;
+        }
+
+        .flow-component {
+            background: white;
+            border-radius: 12px;
+            padding: 25px 20px;
+            text-align: center;
+            min-width: 180px;
+            border: 2px solid #e1e5e9;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .flow-component::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(26, 115, 232, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .flow-component:hover::before {
+            left: 100%;
+        }
+
+        .flow-component:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            border-color: #1a73e8;
+        }
+
+        .flow-component.healthy {
+            border-color: #34a853;
+            background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
+        }
+
+        .flow-component.warning {
+            border-color: #fbbc04;
+            background: linear-gradient(135deg, #ffffff 0%, #fffbeb 100%);
+        }
+
+        .flow-component.error {
+            border-color: #ea4335;
+            background: linear-gradient(135deg, #ffffff 0%, #fef2f2 100%);
+            animation: pulse-error 2s infinite;
+        }
+
+        @keyframes pulse-error {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        .flow-component h3 {
+            font-size: 1.2rem;
+            margin-bottom: 12px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .status-indicator {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            margin: 10px auto;
+            display: block;
+        }
+
+        .status-indicator.healthy {
+            background: #34a853;
+            box-shadow: 0 0 0 3px rgba(52, 168, 83, 0.3);
+        }
+
+        .status-indicator.warning {
+            background: #fbbc04;
+            box-shadow: 0 0 0 3px rgba(251, 188, 4, 0.3);
+        }
+
+        .status-indicator.error {
+            background: #ea4335;
+            box-shadow: 0 0 0 3px rgba(234, 67, 53, 0.3);
+            animation: pulse-red 1.5s infinite;
+        }
+
+        @keyframes pulse-red {
+            0%, 100% { box-shadow: 0 0 0 3px rgba(234, 67, 53, 0.3); }
+            50% { box-shadow: 0 0 0 8px rgba(234, 67, 53, 0); }
+        }
+
+        .flow-status {
+            font-size: 0.95rem;
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .flow-status.healthy { color: #34a853; }
+        .flow-status.warning { color: #f57c00; }
+        .flow-status.error { color: #ea4335; }
+
+        .flow-metric {
+            font-size: 0.8rem;
+            color: #5f6368;
+        }
+
+        .flow-arrow {
+            font-size: 2.5rem;
+            color: #34a853;
+            font-weight: bold;
+            text-shadow: 0 2px 4px rgba(52, 168, 83, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .flow-arrow:hover {
+            color: #137333;
+            transform: scale(1.1);
+        }
+
+        .metrics-dashboard {
+            background: white;
+            padding: 30px;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .metric-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid #e1e5e9;
+            transition: all 0.3s ease;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .metric-card h4 {
+            font-size: 0.9rem;
+            color: #5f6368;
+            margin-bottom: 8px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .metric-card .value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1a73e8;
+            margin-bottom: 5px;
+        }
+
+        .metric-card .subtitle {
+            font-size: 0.8rem;
+            color: #5f6368;
+        }
+
+        .detailed-status {
+            background: white;
+            margin-top: 20px;
+        }
+
+        .section-header {
+            background: #f8f9fa;
+            padding: 20px 30px;
+            border-bottom: 1px solid #e1e5e9;
+            font-weight: 600;
+            color: #333;
+            font-size: 1.1rem;
+        }
+
+        .status-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .status-table th {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            text-align: left;
+            font-weight: 600;
+            color: #5f6368;
+            font-size: 0.85rem;
+            border-bottom: 1px solid #e1e5e9;
+        }
+
+        .status-table td {
+            padding: 18px 20px;
+            border-bottom: 1px solid #f1f3f4;
+            font-size: 0.9rem;
+        }
+
+        .status-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .component-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .table-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+        }
+
+        .table-status.healthy { color: #34a853; }
+        .table-status.warning { color: #f57c00; }
+        .table-status.error { color: #ea4335; }
+
+        .table-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .table-indicator.healthy { background: #34a853; }
+        .table-indicator.warning { background: #fbbc04; }
+        .table-indicator.error { background: #ea4335; }
+
+        .availability-bar {
+            width: 80px;
+            height: 6px;
+            border-radius: 3px;
+            background: #f1f3f4;
+            overflow: hidden;
+            display: inline-block;
+            margin-right: 8px;
+        }
+
+        .availability-fill {
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+
+        .availability-fill.healthy { background: #34a853; }
+        .availability-fill.warning { background: #fbbc04; }
+        .availability-fill.error { background: #ea4335; }
+
+        .controls-section {
+            background: #f8f9fa;
+            padding: 25px 30px;
+            border-top: 1px solid #e1e5e9;
+        }
+
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .control-btn {
+            background: #f8f9fa;
+            border: 1px solid #dadce0;
+            color: #3c4043;
+            padding: 10px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+
+        .control-btn:hover {
+            background: #e8f0fe;
+            border-color: #1a73e8;
+            color: #1a73e8;
+        }
+
+        .control-btn.reset {
+            background: #e8f5e8;
+            border-color: #34a853;
+            color: #34a853;
+        }
+
+        .control-btn.reset:hover {
+            background: #d4f4d4;
+        }
+
+        .alert-banner {
+            background: #fce8e6;
+            border-left: 4px solid #ea4335;
+            padding: 12px 30px;
+            margin: 0;
+            display: none;
+            color: #d93025;
+            font-weight: 500;
+        }
+
+        .alert-banner.show {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .timestamp {
+            text-align: center;
+            color: #5f6368;
+            font-size: 0.85rem;
+            padding: 15px;
+            background: white;
+            border-top: 1px solid #e1e5e9;
+        }
+
+        @media (max-width: 1200px) {
+            .system-flow {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .flow-arrow {
+                transform: rotate(90deg);
+                margin: 10px 0;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+            
+            .header-tabs {
+                overflow-x: auto;
+                width: 100%;
+            }
+            
+            .flow-section {
+                padding: 30px 15px;
+            }
+            
+            .flow-component {
+                min-width: 150px;
+                padding: 20px 15px;
+            }
+            
+            .metrics-dashboard {
+                padding: 20px 15px;
+            }
+            
+            .status-table th,
+            .status-table td {
+                padding: 12px 10px;
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <h1>Virtual Card System Monitor</h1>
+            <div class="header-tabs">
+                <a href="#" class="tab active">System Health</a>
+                <a href="#" class="tab">Performance</a>
+                <a href="#" class="tab">Incidents</a>
+                <a href="#" class="tab">Maintenance</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="filter-section">
+            <span class="filter-label">FILTER ▼</span>
+        </div>
+
+        <div class="alert-banner" id="alertBanner">
+            <strong>⚠ System Alert:</strong> <span id="alertMessage"></span>
+        </div>
+
+        <div class="flow-section">
+            <div class="system-flow">
+                <div class="flow-component healthy" data-component="psaas">
+                    <h3>PSaaS Layer</h3>
+                    <div class="status-indicator healthy"></div>
+                    <div class="flow-status healthy">Active</div>
+                    <div class="flow-metric">Load: 23%</div>
+                </div>
+
+                <div class="flow-arrow">→</div>
+
+                <div class="flow-component healthy" data-component="apache">
+                    <h3>Apache</h3>
+                    <div class="status-indicator healthy"></div>
+                    <div class="flow-status healthy">Running</div>
+                    <div class="flow-metric">Uptime: 99.9%</div>
+                </div>
+
+                <div class="flow-arrow">→</div>
+
+                <div class="flow-component healthy" data-component="tomcat">
+                    <h3>Tomcat</h3>
+                    <div class="status-indicator healthy"></div>
+                    <div class="flow-status healthy">Operational</div>
+                    <div class="flow-metric">Threads: 150/200</div>
+                </div>
+
+                <div class="flow-arrow">→</div>
+
+                <div class="flow-component healthy" data-component="aws">
+                    <h3>AWS API</h3>
+                    <div class="status-indicator healthy"></div>
+                    <div class="flow-status healthy">Available</div>
+                    <div class="flow-metric">Region: us-east-1</div>
+                </div>
+
+                <div class="flow-arrow">→</div>
+
+                <div class="flow-component healthy" data-component="provider">
+                    <h3>Provider</h3>
+                    <div class="status-indicator healthy"></div>
+                    <div class="flow-status healthy">Routing</div>
+                    <div class="flow-metric">Smart Router</div>
+                </div>
+
+                <div class="flow-arrow">→</div>
+
+                <div class="flow-component healthy" data-component="tsys">
+                    <h3>TSYS</h3>
+                    <div class="status-indicator healthy"></div>
+                    <div class="flow-status healthy">Connected</div>
+                    <div class="flow-metric">Latency: 120ms</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="metrics-dashboard">
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <h4>System Availability</h4>
+                    <div class="value" id="systemAvailability">99.95%</div>
+                    <div class="subtitle">Overall Health</div>
+                </div>
+                <div class="metric-card">
+                    <h4>Response Time</h4>
+                    <div class="value" id="responseTime">245ms</div>
+                    <div class="subtitle">Average Latency</div>
+                </div>
+                <div class="metric-card">
+                    <h4>Transaction Volume</h4>
+                    <div class="value" id="totalTxn">1,247</div>
+                    <div class="subtitle">Transactions/min</div>
+                </div>
+                <div class="metric-card">
+                    <h4>Active Sessions</h4>
+                    <div class="value" id="activeSessions">3,456</div>
+                    <div class="subtitle">Current Users</div>
+                </div>
+                <div class="metric-card">
+                    <h4>TSYS Success Rate</h4>
+                    <div class="value" id="tsysSuccess">99.8%</div>
+                    <div class="subtitle">Payment Processing</div>
+                </div>
+                <div class="metric-card">
+                    <h4>Error Rate</h4>
+                    <div class="value" id="errorRate">0.05%</div>
+                    <div class="subtitle">System Errors</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="detailed-status">
+            <div class="section-header">Detailed Component Status</div>
+            <table class="status-table">
+                <thead>
+                    <tr>
+                        <th>Component</th>
+                        <th>Status</th>
+                        <th>Availability</th>
+                        <th>Response Time</th>
+                        <th>Load/Capacity</th>
+                        <th>Last Updated</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="component-row" data-component="psaas">
+                        <td class="component-name">PSaaS Layer</td>
+                        <td>
+                            <span class="table-status healthy">
+                                <span class="table-indicator healthy"></span>
+                                Active
+                            </span>
+                        </td>
+                        <td>
+                            <div class="availability-bar">
+                                <div class="availability-fill healthy" style="width: 100%"></div>
+                            </div>
+                            99.95%
+                        </td>
+                        <td>125ms</td>
+                        <td>23% (Low)</td>
+                        <td class="last-updated">Just now</td>
+                    </tr>
+                    <tr class="component-row" data-component="apache">
+                        <td class="component-name">Apache Web Server</td>
+                        <td>
+                            <span class="table-status healthy">
+                                <span class="table-indicator healthy"></span>
+                                Running
+                            </span>
+                        </td>
+                        <td>
+                            <div class="availability-bar">
+                                <div class="availability-fill healthy" style="width: 100%"></div>
+                            </div>
+                            99.99%
+                        </td>
+                        <td>45ms</td>
+                        <td>CPU: 34%</td>
+                        <td class="last-updated">Just now</td>
+                    </tr>
+                    <tr class="component-row" data-component="tomcat">
+                        <td class="component-name">Tomcat Application Server</td>
+                        <td>
+                            <span class="table-status healthy">
+                                <span class="table-indicator healthy"></span>
+                                Operational
+                            </span>
+                        </td>
+                        <td>
+                            <div class="availability-bar">
+                                <div class="availability-fill healthy" style="width: 100%"></div>
+                            </div>
+                            99.92%
+                        </td>
+                        <td>78ms</td>
+                        <td>150/200 threads</td>
+                        <td class="last-updated">Just now</td>
+                    </tr>
+                    <tr class="component-row" data-component="aws">
+                        <td class="component-name">AWS API Services</td>
+                        <td>
+                            <span class="table-status healthy">
+                                <span class="table-indicator healthy"></span>
+                                Available
+                            </span>
+                        </td>
+                        <td>
+                            <div class="availability-bar">
+                                <div class="availability-fill healthy" style="width: 100%"></div>
+                            </div>
+                            99.94%
+                        </td>
+                        <td>89ms</td>
+                        <td>us-east-1</td>
+                        <td class="last-updated">Just now</td>
+                    </tr>
+                    <tr class="component-row" data-component="provider">
+                        <td class="component-name">Provider Routing Service</td>
+                        <td>
+                            <span class="table-status healthy">
+                                <span class="table-indicator healthy"></span>
+                                Routing
+                            </span>
+                        </td>
+                        <td>
+                            <div class="availability-bar">
+                                <div class="availability-fill healthy" style="width: 100%"></div>
+                            </div>
+                            99.91%
+                        </td>
+                        <td>34ms</td>
+                        <td>Smart Router</td>
+                        <td class="last-updated">Just now</td>
+                    </tr>
+                    <tr class="component-row" data-component="tsys">
+                        <td class="component-name">TSYS Payment Processing</td>
+                        <td>
+                            <span class="table-status healthy">
+                                <span class="table-indicator healthy"></span>
+                                Connected
+                            </span>
+                        </td>
+                        <td>
+                            <div class="availability-bar">
+                                <div class="availability-fill healthy" style="width: 100%"></div>
+                            </div>
+                            99.89%
+                        </td>
+                        <td>120ms</td>
+                        <td>728 txn/min</td>
+                        <td class="last-updated">Just now</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="controls-section">
+            <h3 style="margin-bottom: 15px; color: #333;">System Testing Controls</h3>
+            <p style="color: #5f6368; margin-bottom: 20px;">Simulate various system conditions for testing and validation</p>
+            <div class="controls-grid">
+                <button class="control-btn" onclick="simulateIssue('apache', 'error')">Simulate Apache Down</button>
+                <button class="control-btn" onclick="simulateIssue('tomcat', 'warning')">Simulate Tomcat Warning</button>
+                <button class="control-btn" onclick="simulateIssue('aws', 'error')">Simulate AWS API Error</button>
+                <button class="control-btn" onclick="simulateIssue('provider', 'warning')">Simulate Provider Slow</button>
+                <button class="control-btn" onclick="simulateIssue('tsys', 'error')">Simulate TSYS Down</button>
+                <button class="control-btn reset" onclick="resetAll()">Reset All Systems</button>
+            </div>
+        </div>
+
+        <div class="timestamp">
+            Last updated: <span id="lastUpdate"></span> | Auto-refresh: 30s
+        </div>
+    </div>
+
+    <script>
+        // Component status management
+        const components = {
+            psaas: { name: 'PSaaS Layer', status: 'healthy', statusText: 'Active', availability: '99.95%', responseTime: '125ms', load: '23% (Low)' },
+            apache: { name: 'Apache Web Server', status: 'healthy', statusText: 'Running', availability: '99.99%', responseTime: '45ms', load: 'CPU: 34%' },
+            tomcat: { name: 'Tomcat Application Server', status: 'healthy', statusText: 'Operational', availability: '99.92%', responseTime: '78ms', load: '150/200 threads' },
+            aws: { name: 'AWS API Services', status: 'healthy', statusText: 'Available', availability: '99.94%', responseTime: '89ms', load: 'us-east-1' },
+            provider: { name: 'Provider Routing Service', status: 'healthy', statusText: 'Routing', availability: '99.91%', responseTime: '34ms', load: 'Smart Router' },
+            tsys: { name: 'TSYS Payment Processing', status: 'healthy', statusText: 'Connected', availability: '99.89%', responseTime: '120ms', load: '728 txn/min' }
+        };
+
+        // Error scenarios
+        const errorScenarios = {
+            apache: {
+                error: { statusText: 'Service Down', availability: '0.00%', responseTime: 'N/A', load: 'Error 503', message: 'Apache web server is not responding. Check server status and restart if needed.' },
+                warning: { statusText: 'High Load', availability: '94.2%', responseTime: '2.1s', load: 'CPU: 89%', message: 'Apache server experiencing high CPU load. Consider scaling or load balancing.' }
+            },
+            tomcat: {
+                error: { statusText: 'Gateway Error', availability: '12.5%', responseTime: 'Timeout', load: 'Conn Failed', message: 'Tomcat application server connection failed. Check server configuration.' },
+                warning: { statusText: 'Memory Warning', availability: '91.3%', responseTime: '1.2s', load: '190/200 threads', message: 'Tomcat approaching thread limit. Monitor for potential bottlenecks.' }
+            },
+            aws: {
+                error: { statusText: 'API Unavailable', availability: '23.1%', responseTime: 'N/A', load: 'Status: 500', message: 'AWS API service is experiencing issues. Check AWS status page.' },
+                warning: { statusText: 'Rate Limited', availability: '87.6%', responseTime: '2.3s', load: 'Throttling', message: 'AWS API requests being throttled. Review rate limits.' }
+            },
+            provider: {
+                error: { statusText: 'Router Down', availability: '0.00%', responseTime: 'N/A', load: 'No Routes', message: 'Provider service routing failed. Check routing configuration.' },
+                warning: { statusText: 'Slow Routing', availability: '89.4%', responseTime: '2.1s', load: 'Delay Active', message: 'Provider service experiencing routing delays.' }
+            },
+            tsys: {
+                error: { statusText: 'Connection Lost', availability: '0.00%', responseTime: 'Timeout', load: '0 txn/min', message: 'TSYS connection has timed out. Payment processing affected.' },
+                warning: { statusText: 'Slow Response', availability: '92.1%', responseTime: '2.5s', load: '285 txn/min', message: 'TSYS experiencing high latency. Payment processing may be delayed.' }
+            }
+        };
+
+        function updateComponent(componentId, status, statusText, availability, responseTime, load) {
+            // Update flow component
+            const flowComponent = document.querySelector(`[data-component="${componentId}"]`);
+            const flowIndicator = flowComponent.querySelector('.status-indicator');
+            const flowStatus = flowComponent.querySelector('.flow-status');
+            const flowMetric = flowComponent.querySelector('.flow-metric');
+
+            // Update table row
+            const tableRow = document.querySelector(`.component-row[data-component="${componentId}"]`);
+            const tableStatus = tableRow.querySelector('.table-status');
+            const tableIndicator = tableRow.querySelector('.table-indicator');
+            const availabilityBar = tableRow.querySelector('.availability-fill');
+            const availabilityText = tableRow.querySelector('.availability-bar').nextSibling;
+            const responseTimeElement = tableRow.cells[3];
+            const loadElement = tableRow.cells[4];
+
+            // Remove all status classes
+            flowComponent.classList.remove('healthy', 'warning', 'error');
+            flowIndicator.classList.remove('healthy', 'warning', 'error');
+            flowStatus.classList.remove('healthy', 'warning', 'error');
+            tableStatus.classList.remove('healthy', 'warning', 'error');
+            tableIndicator.classList.remove('healthy', 'warning', 'error');
+            availabilityBar.classList.remove('healthy', 'warning', 'error');
+
+            // Add new status
+            flowComponent.classList.add(status);
+            flowIndicator.classList.add(status);
+            flowStatus.classList.add(status);
+            tableStatus.classList.add(status);
+            tableIndicator.classList.add(status);
+            availabilityBar.classList.add(status);
+            
+            // Update text content
+            flowStatus.textContent = statusText;
+            flowMetric.textContent = load;
+            tableStatus.innerHTML = `<span class="table-indicator ${status}"></span>${statusText}`;
+            availabilityText.textContent = ` ${availability}`;
+            responseTimeElement.textContent = responseTime;
+            loadElement.textContent = load;
+
+            // Update availability bar width
+            const availabilityValue = parseFloat(availability);
+            availabilityBar.style.width = availabilityValue + '%';
+
+            // Update component data
+            components[componentId].status = status;
+            components[componentId].statusText = statusText;
+            components[componentId].availability = availability;
+            components[componentId].responseTime = responseTime;
+            components[componentId].load = load;
+        }
+
+        function simulateIssue(componentId, severity) {
+            const scenario = errorScenarios[componentId][severity];
+            if (scenario) {
+                updateComponent(componentId, severity, scenario.statusText, scenario.availability, scenario.responseTime, scenario.load);
+                showAlert(scenario.message);
+                
+                // Update overview metrics
+                if (severity === 'error') {
+                    document.getElementById('systemAvailability').textContent = '87.3%';
+                    document.getElementById('responseTime').textContent = '1,247ms';
+                    document.getElementById('errorRate').textContent = '12.7%';
+                    
+                    if (componentId === 'tsys') {
+                        document.getElementById('tsysSuccess').textContent = '0.0%';
+                    }
+                } else if (severity === 'warning') {
+                    document.getElementById('systemAvailability').textContent = '94.1%';
+                    document.getElementById('responseTime').textContent = '456ms';
+                    document.getElementById('errorRate').textContent = '5.9%';
+                    
+                    if (componentId === 'tsys') {
+                        document.getElementById('tsysSuccess').textContent = '92.1%';
+                    }
+                }
+            }
+        }
+
+        function resetAll() {
+            Object.keys(components).forEach(componentId => {
+                const comp = components[componentId];
+                updateComponent(componentId, 'healthy', comp.statusText, comp.availability, comp.responseTime, comp.load);
+            });
+            
+            // Reset overview metrics
+            document.getElementById('systemAvailability').textContent = '99.95%';
+            document.getElementById('responseTime').textContent = '245ms';
+            document.getElementById('errorRate').textContent = '0.05%';
+            document.getElementById('tsysSuccess').textContent = '99.8%';
+            
+            hideAlert();
+        }
+
+        function showAlert(message) {
+            const alertBanner = document.getElementById('alertBanner');
+            const alertMessage = document.getElementById('alertMessage');
+            alertMessage.textContent = message;
+            alertBanner.classList.add('show');
+        }
+
+        function hideAlert() {
+            const alertBanner = document.getElementById('alertBanner');
+            alertBanner.classList.remove('show');
+        }
+
+        function updateTimestamp() {
+            const now = new Date();
+            document.getElementById('lastUpdate').textContent = now.toLocaleTimeString();
+            
+            // Update all "last updated" cells
+            document.querySelectorAll('.last-updated').forEach(cell => {
+                cell.textContent = 'Just now';
+            });
+        }
+
+        function simulateRealTimeData() {
+            // Simulate changing metrics for healthy systems only
+            if (components.tsys.status === 'healthy') {
+                const totalTxn = Math.floor(Math.random() * 200) + 1200;
+                const sessions = Math.floor(Math.random() * 500) + 3200;
+                
+                document.getElementById('totalTxn').textContent = totalTxn.toLocaleString();
+                document.getElementById('activeSessions').textContent = sessions.toLocaleString();
+            }
+        }
+
+        // Add click handlers for components
+        document.querySelectorAll('[data-component]').forEach(element => {
+            element.addEventListener('click', () => {
+                const componentId = element.getAttribute('data-component');
+                const comp = components[componentId];
+                alert(`${comp.name}\nStatus: ${comp.statusText}\nAvailability: ${comp.availability}\nResponse Time: ${comp.responseTime}\nLoad/Capacity: ${comp.load}`);
+            });
+        });
+
+        // Initialize and start real-time updates
+        updateTimestamp();
+        setInterval(updateTimestamp, 30000); // Every 30 seconds
+        setInterval(simulateRealTimeData, 5000);
+
+        // Initial data simulation
+        simulateRealTimeData();
+    </script>
+</body>
+</html>
