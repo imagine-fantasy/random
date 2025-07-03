@@ -1,0 +1,162 @@
+# application.properties
+app.sqs.retry.backoff-delays=1,3,5
+your.queue.name=your-queue-name
+aws.region=us-east-1
+
+@Component
+public class MessageProcessor {
+    
+    private static final Logger LOGGER = LoggerFactory.getLogger(MessageProcessor.class);
+    
+    @Value("${app.sqs.retry.backoff-delays}")
+    private List<Integer> backoffDelays;
+    
+    @Autowired
+    private SqsAsyncClient sqsAsyncClient;
+    
+    @Value("${your.queue.name}")
+    private String queueName;
+    
+    private final Random random = new Random();
+    
+    @SqsListener(value = "${your.queue.name}")
+    public void processMessage(
+            @Payload String messageBody,
+            @Header("ApproximateReceiveCount") String receiveCountStr,
+            @Header(SqsHeaders.SQS_RECEIPT_HANDLE_HEADER) String receiptHandle) {
+        
+        int receiveCount = Integer.parseInt(receiveCountStr);
+        
+        try {
+            LOGGER.info("🚀 Processing message, SQS attempt #{}", receiveCount);
+            
+            // Hardcoded test failure simulation (remove in production)
+            if (random.nextInt(100) < 40) { // 40% failure rate for testing
+                LOGGER.warn("💥 Simulating test failure");
+                throw new RuntimeException("Simulated failure for testing backoff");
+            }
+            
+            // Your actual business logic
+            processBusinessLogic(messageBody);
+            
+            // Success! Framework auto-acknowledges
+            LOGGER.info("✅ Message processed successfully on SQS attempt #{}", receiveCount);
+            
+        } catch (Exception e) {
+            LOGGER.error("❌ Failed to process message on SQS attempt #{}: {}", 
+                        receiveCount, e.getMessage(), e);
+            
+            // Set visibility timeout for exponential backoff on next retry
+            int nextAttemptNumber = receiveCount + 1;
+            int delayMinutes = getBackoffDelayForAttempt(nextAttemptNumber);
+            
+            if (delayMinutes > 0) {
+                LOGGER.info("⏰ SQS attempt #{} failed - setting visibility timeout to {} minutes for attempt #{}", 
+                          receiveCount, delayMinutes, nextAttemptNumber);
+                setMessageVisibilityTimeout(receiptHandle, delayMinutes * 60);
+            } else {
+                LOGGER.info("⏰ SQS attempt #{} failed - no backoff configured, using default visibility timeout", 
+                          receiveCount);
+            }
+            
+            // Re-throw the exception so the framework knows this failed
+            throw new RuntimeException("Message processing failed on SQS attempt " + receiveCount, e);
+        }
+    }
+    
+    /**
+     * Get the backoff delay for a specific retry attempt
+     * @param receiveCount The SQS receive count (1-based)
+     * @return delay in minutes, or 0 if no delay needed
+     */
+    private int getBackoffDelayForAttempt(int receiveCount) {
+        if (receiveCount <= 1) {
+            return 0; // No delay for first attempt
+        }
+        
+        // Convert receiveCount to backoff index (receiveCount 2 -> index 0, etc.)
+        int backoffIndex = receiveCount - 2;
+        
+        if (backoffIndex < backoffDelays.size()) {
+            return backoffDelays.get(backoffIndex);
+        }
+        
+        // If we've exceeded configured delays, use the last one
+        return backoffDelays.isEmpty() ? 0 : backoffDelays.get(backoffDelays.size() - 1);
+    }
+    
+    /**
+     * Set the visibility timeout for a specific message
+     * @param receiptHandle The SQS receipt handle for the message
+     * @param timeoutSeconds Visibility timeout in seconds
+     */
+    private void setMessageVisibilityTimeout(String receiptHandle, int timeoutSeconds) {
+        try {
+            // Let AWS SDK resolve the queue URL from the queue name
+            GetQueueUrlRequest getUrlRequest = GetQueueUrlRequest.builder()
+                    .queueName(queueName)
+                    .build();
+            
+            sqsAsyncClient.getQueueUrl(getUrlRequest)
+                    .thenCompose(getUrlResponse -> {
+                        ChangeMessageVisibilityRequest request = ChangeMessageVisibilityRequest.builder()
+                                .queueUrl(getUrlResponse.queueUrl())
+                                .receiptHandle(receiptHandle)
+                                .visibilityTimeoutSeconds(timeoutSeconds)
+                                .build();
+                        
+                        return sqsAsyncClient.changeMessageVisibility(request);
+                    })
+                    .whenComplete((response, throwable) -> {
+                        if (throwable != null) {
+                            LOGGER.error("Failed to change message visibility timeout: {}", 
+                                       throwable.getMessage(), throwable);
+                        } else {
+                            LOGGER.debug("Successfully set visibility timeout to {} seconds", timeoutSeconds);
+                        }
+                    });
+                    
+        } catch (Exception e) {
+            LOGGER.error("Error setting message visibility timeout: {}", e.getMessage(), e);
+        }
+    }
+    
+    /**
+     * Your actual business logic - replace with real implementation
+     */
+    private void processBusinessLogic(String messageBody) {
+        LOGGER.info("🔧 Processing business logic for: {}", 
+                   messageBody.length() > 50 ? messageBody.substring(0, 50) + "..." : messageBody);
+        
+        // Example business logic that might fail
+        if (messageBody.contains("FORCE_ERROR")) {
+            throw new RuntimeException("Forced error for testing");
+        }
+        
+        // Simulate some processing time
+        try {
+            Thread.sleep(100);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        
+        // Your real business logic goes here:
+        // - Call external APIs (RestTemplate, WebClient)
+        // - Save to database  
+        // - Transform data
+        // - Send notifications
+        // - Process files
+        // etc.
+    }
+}
+
+@Configuration
+public class SqsConfiguration {
+    
+    @Bean
+    public SqsAsyncClient sqsAsyncClient() {
+        return SqsAsyncClient.builder()
+                .region(Region.US_EAST_1) // Configure your region
+                .build();
+    }
+}
