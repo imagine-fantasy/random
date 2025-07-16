@@ -1,0 +1,155 @@
+// ===================================================================
+// SIMPLE SPLUNK SDK IMPLEMENTATION
+// Start basic, add complexity only if needed
+// ===================================================================
+
+// 1. MAVEN DEPENDENCY (Just one!)
+/*
+<dependency>
+    <groupId>com.splunk</groupId>
+    <artifactId>splunk</artifactId>
+    <version>1.9.5</version>
+</dependency>
+*/
+
+// ===================================================================
+// 2. SIMPLE SERVICE CLASS
+// ===================================================================
+
+import com.splunk.*;
+import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Value;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.BufferedReader;
+
+@Service
+public class SplunkService {
+    
+    @Value("${splunk.host}")
+    private String host;
+    
+    @Value("${splunk.port:13007}")
+    private int port;
+    
+    @Value("${splunk.username}")
+    private String username;
+    
+    @Value("${splunk.password}")
+    private String password;
+    
+    public HttpStatusMetrics getHttpStatusCounts() {
+        try {
+            // 1. Connect to Splunk
+            ServiceArgs args = new ServiceArgs();
+            args.setHost(host);
+            args.setPort(port);
+            args.setScheme("https");
+            
+            Service service = Service.connect(args);
+            service.login(username, password);
+            
+            // 2. Create search job
+            String searchQuery = "search index=psaas_healthcheck | stats count by statuscode | sort statuscode";
+            Job job = service.getJobs().create(searchQuery);
+            
+            // 3. Wait for completion
+            while (!job.isDone()) {
+                Thread.sleep(1000);
+            }
+            
+            // 4. Get results
+            InputStream results = job.getResults();
+            String jsonResults = readStream(results);
+            
+            // 5. Parse and return
+            return parseResults(jsonResults);
+            
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+            return new HttpStatusMetrics(0, 0, 0);
+        }
+    }
+    
+    private String readStream(InputStream stream) throws Exception {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+        StringBuilder result = new StringBuilder();
+        String line;
+        while ((line = reader.readLine()) != null) {
+            result.append(line);
+        }
+        return result.toString();
+    }
+    
+    private HttpStatusMetrics parseResults(String jsonResults) {
+        // Simple parsing - look for "200" and "500" in the JSON
+        int count200 = 0;
+        int count500 = 0;
+        
+        System.out.println("Raw results: " + jsonResults);
+        
+        // TODO: Parse JSON properly, but for now just return dummy data
+        return new HttpStatusMetrics(count200, count500, count200 + count500);
+    }
+}
+
+// ===================================================================
+// 3. SIMPLE DATA CLASS
+// ===================================================================
+
+public class HttpStatusMetrics {
+    private int successCount;
+    private int errorCount;
+    private int totalCount;
+    
+    public HttpStatusMetrics(int successCount, int errorCount, int totalCount) {
+        this.successCount = successCount;
+        this.errorCount = errorCount;
+        this.totalCount = totalCount;
+    }
+    
+    // Getters
+    public int getSuccessCount() { return successCount; }
+    public int getErrorCount() { return errorCount; }
+    public int getTotalCount() { return totalCount; }
+}
+
+// ===================================================================
+// 4. SIMPLE CONTROLLER
+// ===================================================================
+
+import org.springframework.web.bind.annotation.*;
+import org.springframework.beans.factory.annotation.Autowired;
+
+@RestController
+public class MetricsController {
+    
+    @Autowired
+    private SplunkService splunkService;
+    
+    @GetMapping("/metrics")
+    public HttpStatusMetrics getMetrics() {
+        return splunkService.getHttpStatusCounts();
+    }
+}
+
+// ===================================================================
+// 5. SIMPLE APPLICATION.PROPERTIES
+// ===================================================================
+
+/*
+splunk.host=wh-137a4b2ada.svr.us.jpmorgan.net
+splunk.port=13007
+splunk.username=your-username
+splunk.password=your-password
+*/
+
+// ===================================================================
+// THAT'S IT! 
+// 
+// Test it:
+// 1. Run your Spring Boot app
+// 2. Call GET /metrics
+// 3. See what error you get (if any)
+// 4. Fix only what's actually broken
+// ===================================================================
