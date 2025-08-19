@@ -1,0 +1,32 @@
+
+flowchart LR
+    subgraph CardService["Card API Service"]
+        Cache["Caffeine Cache<br/>~1ms"]
+        Scheduler["Scheduler<br/>Every 5 minutes"]
+    end
+    
+    DB["Aurora Database<br/>Model Updates + Timestamps"]
+    
+    DB -->|"Model updated<br/>(timestamp changes)"| DB
+    Scheduler -.->|"Check timestamps<br/>Compare cache vs DB"| DB
+    Scheduler -.->|"Invalidate if stale<br/>Selective eviction"| Cache
+    
+    Cache -.->|"Cache miss<br/>~27ms"| DB
+
+
+
+flowchart LR
+    subgraph CardService["Card API Service"]
+        Cache["Caffeine Cache<br/>~1ms"]
+    end
+    
+    DB["Aurora Database<br/>Model Updates"]
+    
+    Kafka["Kafka Topic<br/>card-model-updates"]
+    
+    DB -->|"Model updated<br/>(CDC or App publishes)"| Kafka
+    Kafka -.->|"Event: model ID changed<br/>Real-time invalidation"| Cache
+    
+    Cache -.->|"Cache miss<br/>~27ms"| DB
+
+
