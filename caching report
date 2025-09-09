@@ -1,0 +1,384 @@
+# Card Model Cache Invalidation: Architectural Analysis
+
+## Executive Summary
+
+This document analyzes two approaches for implementing real-time cache invalidation for our card model system. We’re moving from a 24-hour TTL approach to sub-second cache freshness while maintaining system reliability and operational simplicity.
+
+**The Challenge:** Our card models are heavily cached for performance (1ms cache hits vs 27ms database calls), but changes are infrequent and currently require up to 24 hours to propagate. We need a solution that provides near-real-time invalidation without adding operational complexity.
+
+**Key Finding:** Both approaches solve the core problem effectively, with different trade-offs between guaranteed delivery and operational simplicity.
+
+-----
+
+## Current State Analysis
+
+### Existing Architecture
+
+- **Cache Layer:** Caffeine with 24-hour TTL
+- **Performance:** 1ms cache hits, 27ms database fallback
+- **Change Frequency:** Card models update 1-2 times per hour
+- **Problem:** Stale data served for up to 24 hours after changes
+
+### Business Requirements
+
+- Reduce cache staleness from 24 hours to under 5 seconds
+- Maintain current performance characteristics
+- Minimize operational overhead
+- Support dynamic scaling (10+ application instances)
+
+-----
+
+## Architecture Diagrams
+
+### NOTIFY/LISTEN Approach Flow
+
+```mermaid
+flowchart TD
+    A[Card Model Update] --> B[Database Trigger Fires]
+    B --> C[pg_notify broadcasts message]
+    C --> D[All Active Listeners Receive]
+    D --> E1[Instance 1 Cache Eviction]
+    D --> E2[Instance 2 Cache Eviction] 
+    D --> E3[Instance N Cache Eviction]
+    E1 --> F[Next Request Gets Fresh Data]
+    E2 --> F
+    E3 --> F
+    
+    style A fill:#e1f5fe
+    style C fill:#f3e5f5
+    style F fill:#e8f5e8
+```
+
+### CDC Approach Flow
+
+```mermaid
+flowchart TD
+    A[Card Model Update] --> B[WAL Entry Created]
+    B --> C[Logical Slot 1 Reads WAL]
+    B --> D[Logical Slot 2 Reads WAL]
+    B --> E[Logical Slot N Reads WAL]
+    C --> F1[Debezium Instance 1]
+    D --> F2[Debezium Instance 2]
+    E --> F3[Debezium Instance N]
+    F1 --> G1[Cache Eviction 1]
+    F2 --> G2[Cache Eviction 2] 
+    F3 --> G3[Cache Eviction N]
+    G1 --> H[Next Request Gets Fresh Data]
+    G2 --> H
+    G3 --> H
+    
+    style A fill:#e1f5fe
+    style B fill:#fff3e0
+    style H fill:#e8f5e8
+```
+
+-----
+
+## Approach 1: PostgreSQL NOTIFY/LISTEN with Triggers
+
+### Architecture Overview
+
+This approach uses PostgreSQL’s built-in messaging system to broadcast change notifications directly from the database when JSON content changes.
+
+```sql
+-- Database trigger fires on JSON changes only
+CREATE OR REPLACE FUNCTION notify_card_json_change()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Only notify when JSON content actually changes
+    IF OLD.card_modl_dtl_tx IS DISTINCT FROM NEW.card_modl_dtl_tx THEN
+        PERFORM pg_notify('card_model_updated', NEW.card_modl_id);
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER card_json_change_trigger
+    AFTER UPDATE ON comm_card.card_modl_dtl
+    FOR EACH ROW
+    EXECUTE FUNCTION notify_card_json_change();
+```
+
+### Application Implementation
+
+```java
+@Service
+public class CardModelNotificationService {
+    
+    private Connection listenerConnection;
+    
+    @PostConstruct
+    public void setupListener() {
+        // Option 1: Dedicated connection (zero gap, more complex)
+        listenerConnection = createDedicatedConnection();
+        listenerConnection.execute("LISTEN card_model_updated");
+        
+        // Option 2: Pooled connection (1-second gap, simpler)
+        // Handled in scheduled method below
+    }
+    
+    @Scheduled(fixedRate = 1000) // Every 1 second
+    public void checkForNotifications() {
+        // Pooled approach: brief connection, return to pool
+        try (Connection conn = dataSource.getConnection()) {
+            conn.execute("LISTEN card_model_updated");
+            PGConnection pgConn = conn.unwrap(PGConnection.class);
+            PGNotification[] notifications = pgConn.getNotifications(100);
+            
+            if (notifications != null) {
+                for (PGNotification notification : notifications) {
+                    invalidateCardModel(notification.getParameter());
+                }
+            }
+        }
+    }
+    
+    private void invalidateCardModel(String cardModelId) {
+        cacheManager.evict("cardModels", cardModelId);
+        log.info("🔄 Cache invalidated for card model: {}", cardModelId);
+    }
+}
+```
+
+### Key Characteristics
+
+**Message Delivery:**
+
+- **Storage:** Ephemeral (in-memory only, no persistence)
+- **Retention:** ~30 seconds maximum, then discarded
+- **Delivery:** Best-effort to active listeners only
+- **Broadcast:** All listening instances receive the same message simultaneously
+
+**Connection Strategy Options:**
+
+1. **Dedicated Connection:** Zero notification gaps, requires connection lifecycle management
+1. **Pooled Connection:** Maximum 1-second notification gap, leverages existing pool infrastructure
+
+**Resource Usage:**
+
+- **Database Impact:** Minimal trigger overhead on JSON updates only
+- **Memory:** ~1KB per notification message
+- **Network:** Notification packets only when changes occur
+- **Connections:** 1 dedicated OR 3,600 brief pool borrows per hour
+
+-----
+
+## Approach 2: Change Data Capture (CDC) with Logical Replication
+
+### Architecture Overview
+
+This approach uses PostgreSQL’s logical replication capabilities to capture all changes and stream them to application instances via Debezium.
+
+### Database Configuration Required
+
+```sql
+-- Enable logical replication (requires restart in older PostgreSQL versions)
+ALTER SYSTEM SET wal_level = 'logical';
+ALTER SYSTEM SET max_replication_slots = 20;  -- For multiple instances
+SELECT pg_reload_conf();
+```
+
+### Application Implementation
+
+```java
+@Service
+public class CardModelCDCService {
+    
+    private final String instanceId = UUID.randomUUID().toString();
+    private final String slotName = "card_cdc_" + instanceId;
+    
+    @PostConstruct
+    public void startCDC() {
+        Configuration config = Configuration.create()
+            .with("name", "card-model-cdc")
+            .with("connector.class", "io.debezium.connector.postgresql.PostgresConnector")
+            .with("database.hostname", dbHost)
+            .with("database.port", dbPort)
+            .with("database.user", dbUser)
+            .with("database.password", dbPassword)
+            .with("database.dbname", dbName)
+            .with("table.include.list", "comm_card.card_modl_dtl")
+            .with("slot.name", slotName)  // Each instance needs its own slot
+            .with("snapshot.mode", "never"); // Only future changes
+            
+        DebeziumEngine<ChangeEvent<String, String>> engine = DebeziumEngine.create(Json.class)
+            .using(config.asProperties())
+            .notifying(this::handleChangeEvent)
+            .build();
+            
+        engine.run();
+    }
+    
+    private void handleChangeEvent(ChangeEvent<String, String> event) {
+        // Parse change event and extract card_modl_id
+        String cardModelId = extractCardModelId(event.value());
+        if (cardModelId != null) {
+            cacheManager.evict("cardModels", cardModelId);
+            log.info("🔄 CDC invalidated cache for: {}", cardModelId);
+        }
+    }
+}
+```
+
+### Logical Replication Slots
+
+**What They Do:**
+
+- Act as “bookmarks” in the WAL (Write-Ahead Log)
+- Guarantee message delivery by holding WAL data until consumed
+- Each consumer needs its own slot for independent progress tracking
+
+**Resource Impact:**
+
+- **Memory:** ~10-50MB per active slot
+- **Disk:** WAL retention until slot confirms consumption
+- **CPU:** Logical decoding overhead (~2-5% increase)
+
+**Slot Management Challenge:**
+When application instances crash, their slots become “orphaned” and continue accumulating WAL data indefinitely. This requires monitoring and cleanup automation.
+
+-----
+
+## Detailed Comparison
+
+|Aspect                         |NOTIFY/LISTEN                                 |CDC with Logical Replication               |
+|-------------------------------|----------------------------------------------|-------------------------------------------|
+|**Setup Complexity**           |Low - Single trigger function                 |High - Multiple configuration layers       |
+|**Database Changes**           |Minimal - Add trigger only                    |Significant - WAL level, slots, permissions|
+|**Delivery Guarantee**         |Best-effort (ephemeral)                       |Guaranteed (persisted until consumed)      |
+|**Message Persistence**        |None (in-memory only)                         |Full WAL retention until consumed          |
+|**Instance Crash Recovery**    |Immediate - just reconnect                    |Complex - slot lifecycle management        |
+|**Resource Usage**             |Minimal - notification packets only           |Moderate - WAL retention, slot memory      |
+|**Operational Overhead**       |Very low - basic connection monitoring        |High - slot monitoring, cleanup automation |
+|**Scalability**                |Linear - same cost per instance               |Grows with slots - each instance needs one |
+|**Real-time Performance**      |Sub-second with pooled, instant with dedicated|Sub-second, guaranteed delivery            |
+|**Infrastructure Dependencies**|PostgreSQL only                               |PostgreSQL + Debezium + monitoring         |
+|**Failure Modes**              |Missed notifications during outages           |WAL accumulation, slot exhaustion          |
+|**Debugging**                  |Simple - connection status only               |Complex - slot lag, consumer state         |
+|**Development Time**           |1-2 days                                      |1-2 weeks including monitoring             |
+
+-----
+
+## Database Impact Analysis
+
+### WAL Level Change: replica → logical
+
+**Current State:** `wal_level = replica` (supports streaming replication)
+**Required for CDC:** `wal_level = logical` (supports change data capture)
+
+**Impact Assessment:**
+
+- **Backward Compatibility:** ✅ All replica functionality continues to work
+- **WAL Size Increase:** ~10% larger WAL files (more detailed logging)
+- **CPU Overhead:** 2-5% increase during logical decoding operations
+- **Storage Impact:** Minimal for our low-frequency changes
+- **Aurora Support:** ✅ Fully supported on Aurora PostgreSQL
+
+**Risk Level:** **LOW** - This is a standard configuration change with minimal operational impact.
+
+### Logical Replication Slot Usage
+
+**What Slots Are Normally Used For:**
+
+- Streaming replication to read replicas
+- Cross-database replication (PostgreSQL to PostgreSQL)
+- Data warehouse ETL pipelines
+- Audit log streaming
+- Change data capture for analytics
+
+**Our Usage Pattern:**
+
+- Need 1 slot per application instance (10+ slots for current scaling)
+- Slots would be actively consumed (low WAL retention risk)
+- Our change frequency is low (minimal slot pressure)
+
+**Resource Starvation Risk:**
+
+- **Aurora Default:** Usually 20-50 slots available
+- **Our Need:** 10-15 slots for current architecture
+- **Risk Assessment:** **LOW** - well within normal usage patterns
+- **Monitoring Required:** Slot count and WAL lag alerts
+
+-----
+
+## Connection Pool Analysis (NOTIFY/LISTEN Approach)
+
+### Pooled Connection Strategy Impact
+
+**Usage Pattern:**
+
+- 3,600 connection borrows per hour (1 per second)
+- ~10ms hold time per connection
+- 99.97% connection availability for other work
+
+**Pool Health Assessment:**
+
+- **Modern Connection Pools:** Designed for thousands of brief connections per hour
+- **Overhead:** Negligible - this is normal pool behavior
+- **Resource Impact:** Lower than maintaining dedicated connections
+- **Monitoring:** Standard pool metrics continue to apply
+
+**Risk Assessment:** **MINIMAL** - Well within normal connection pool operating parameters.
+
+-----
+
+## Recommendation Matrix
+
+### Choose NOTIFY/LISTEN If:
+
+- ✅ **Time-to-market is critical** (can deploy this week)
+- ✅ **Operational simplicity is prioritized** (minimal ongoing maintenance)
+- ✅ **Best-effort delivery is acceptable** (occasional missed notifications OK)
+- ✅ **Team prefers proven, simple patterns** (triggers + notifications)
+- ✅ **Current infrastructure should remain unchanged** (no database config changes)
+
+### Choose CDC If:
+
+- ✅ **Guaranteed delivery is non-negotiable** (zero tolerance for lost events)
+- ✅ **Team has bandwidth for infrastructure investment** (monitoring, automation)
+- ✅ **Future data streaming needs anticipated** (building foundation for broader CDC)
+- ✅ **Enterprise patterns preferred** (industry-standard change capture)
+- ✅ **Development time available** (2+ weeks for full implementation)
+
+-----
+
+## Implementation Recommendations
+
+### Immediate (This Sprint)
+
+**Implement NOTIFY/LISTEN with pooled connections** for rapid deployment and immediate value delivery.
+
+### Phase 1: Basic Implementation
+
+1. Deploy trigger function to staging
+1. Implement pooled connection notification checking
+1. Add basic cache invalidation logic
+1. Deploy with feature flag for easy rollback
+
+### Phase 2: Production Hardening
+
+1. Add connection health monitoring
+1. Implement notification deduplication if needed
+1. Add metrics and alerting
+1. Gradual rollout with performance monitoring
+
+### Phase 3: Future Evolution (Optional)
+
+If guaranteed delivery becomes a requirement, migration path to CDC approach is straightforward - both target the same trigger point (JSON changes) and same outcome (cache invalidation).
+
+-----
+
+## Conclusion
+
+Both approaches solve our core problem effectively. **NOTIFY/LISTEN provides 95% of the benefits with 10% of the complexity**, making it the optimal choice for our current requirements and timeline constraints.
+
+The beauty of this decision is that it’s not permanent - we can always evolve to CDC later if business requirements change, but we can deliver immediate value with the simpler approach now.
+
+**Recommended Next Steps:**
+
+1. Team review and approval of NOTIFY/LISTEN approach
+1. Proof of concept in development environment
+1. Performance testing with realistic load
+1. Staged production deployment
+
+The goal isn’t to build the most sophisticated system possible - it’s to build the most appropriate system for our actual needs. Sometimes the most sophisticated choice is the elegantly simple one.
