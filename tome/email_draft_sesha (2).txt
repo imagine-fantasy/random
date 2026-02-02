@@ -1,0 +1,51 @@
+Subject: Dual-Namespace Tokenization Implementation - Task Breakdown & Estimates
+
+Hi Sesha,
+
+Following up on our discussion about the dual-namespace (NS1 + NS2) implementation for TOME migration. I've prepared the task breakdown and estimates (attached/linked below).
+
+**Context:**
+As we discussed, with TOME's dual-namespace architecture, we need to handle both NS1 (internal tokens) and NS2 (external reference IDs) for all tokenization operations. The library/JAR approach to orchestrate these dual-namespace calls was originally discussed and makes sense for platform-wide adoption.
+
+**Analysis for Card Domain:**
+While doing the analysis for card domain specifically, I identified some concerns given our unique requirements:
+
+1. **Failure Points**: Dual TOME calls at card creation time (NS1 + NS2) introduces multiple failure points - if either call fails, card creation fails
+2. **TOME Load**: Library approach means 2 TOME calls per operation (NS1 + NS2) which significantly increases load on TOME
+3. **ECS Compatibility**: Our stateless ECS containers restart frequently; any in-memory caching approach won't survive restarts
+4. **Latency**: Dual TOME calls on every card creation and detokenization adds latency
+
+**Approach for Card Domain:**
+Based on this analysis, I've also come up with an approach specifically for card domain:
+
+**Prefetch + DB Storage Approach**
+- How it works:
+  - Lambda batch job prefetches token pairs from both NS1 and NS2 hourly
+  - Stores pre-mapped pairs in database (PostgreSQL/CockroachDB)
+  - Card creation reserves from pool (eliminates real-time TOME calls)
+  - Detokenize uses DB lookup instead of NS2 TOME call
+  - Built-in fallback to direct TOME calls if pool exhausted
+
+- Benefits for card domain:
+  - **Reduced TOME load**: Significantly cuts TOME calls
+  - **ECS compatible**: Database-backed shared state survives container restarts
+  - **Performance**: No dual TOME calls during card creation
+  - **Reduced failure points**: Token pairs are pre-mapped and ready to use
+  - **Resilience**: Fallback logic ensures zero downtime
+
+**Going Forward:**
+We can proceed with both approaches - the library for general platform teams, and the prefetch approach specifically for card domain's requirements.
+
+I've prepared detailed task estimates for both approaches. The breakdown includes:
+- Common tasks (NS2 namespace onboarding - required regardless)
+- Approach 1 tasks (library development)
+- Approach 2 tasks (batch job, application integration, testing, pool management)
+
+Looking forward to your thoughts.
+
+Best regards,
+Gaurav
+
+---
+Attachments/Links:
+[Link to Confluence page with task estimates]
