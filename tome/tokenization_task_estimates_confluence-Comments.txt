@@ -1,0 +1,78 @@
+h1. Tokenization Implementation - Task List & Estimates
+
+----
+
+h2. Common Tasks (Required Regardless of Approach)
+
+|| Task || Estimate || Comments ||
+| HERA KMS onboarding - UAT | | |
+| HERA KMS onboarding - Production | | |
+| Master key creation - UAT | | |
+| Master key creation - Production | | |
+| TOME NS2 namespace onboarding - UAT | | |
+| TOME NS2 namespace onboarding - Production | | |
+| Validate onboarding with TOME team - UAT | | |
+| Validate onboarding with TOME team - Production | | |
+
+*Note:* _Process/approvals for UAT and Production environments may take 1-2 weeks independently from technical effort._
+
+----
+
+h2. Approach 1: JAR/Library Approach
+
+|| Task || Estimate || Comments ||
+| Create library/SDK wrapper around TOME client | | |
+| Define library interfaces (TokenizationLibrary, TokenPair) | | |
+| Implement dual-namespace tokenize logic (NS1 + NS2 calls) | | |
+| Implement dual-namespace detokenize logic (NS2 lookup + NS1 detokenize) | | |
+| Implement dual-namespace lookup logic | | |
+| Add overloaded methods for internal token operations (optional - for card domain to skip NS2 lookup) | | |
+| Add retry logic and error handling | | |
+| Add structured logging with correlation IDs | | |
+| Write unit tests | | |
+| Write integration tests with TOME dev environment | | |
+| Publish library to internal Maven repo | | |
+
+*Note:* Adoption by consuming teams is a separate effort and timeline depends on individual team schedules.
+
+----
+
+h2. Approach 2: Prefetch + DB Storage Approach
+
+|| Task || Estimate || Comments ||
+| *Batch Job (Lambda)* | | |
+| Design and create token_pool table | | Schema: internal_token, external_ref_id, status (AVAILABLE/RESERVED/USED), timestamps, indexes on status for fast lookups |
+| Create Lambda function for token prefetch (NS1 + NS2 + mapping + bulk insert to DB) | | Fetches 5K tokens from NS1, 5K from NS2, maps them via NS2 tokenize call, bulk inserts to DB |
+| Configure Lambda (EventBridge cron, timeout, memory, IAM roles) | | Hourly cron schedule, 10-min timeout, DB access IAM roles, VPC connectivity |
+| Add monitoring and alerting (CloudWatch metrics, alarms, SNS notifications for pool low/failures) | | Track pool size, Lambda execution success/failure, alert when pool < threshold or Lambda fails |
+| Unit and integration testing | | Test batch prefetch logic, DB insert, error handling with TOME dev environment |
+| *Application Changes* | | |
+| Changes to card creation flow using premapped pool | | Use FOR UPDATE SKIP LOCKED to reserve token pair from pool, eliminates need for 2 TOME calls during creation |
+| Implement fallback logic (direct TOME calls if pool empty) | | If pool exhausted, fall back to direct NS1+NS2 TOME calls to ensure zero downtime |
+| Update detokenize flow to use DB lookup | | Query DB for internal token using external ref ID, eliminates NS2 lookup TOME call |
+| Update lookup flow to use DB lookup | | Use DB mapping instead of NS2 TOME call for lookups |
+| Unit and integration testing | | Test concurrent token reservations, pool exhaustion scenarios, fallback logic, end-to-end flows |
+| *Testing & Deployment* | | |
+| QA testing | | Functional regression, edge cases, failure scenarios |
+| Performance testing | | Load test at 50K cards/day, measure latency (p50/p95/p99), verify TOME call reduction |
+| *Pool Management* | | |
+| Monitor pool health and consumption (dashboards, pool size tracking) | | CloudWatch dashboard showing available tokens, consumption rate, refill rate, TOME call metrics |
+| Make pool configuration tunable (refill frequency, pool size thresholds) | | Allow adjusting Lambda schedule frequency and pool size based on actual consumption patterns |
+
+----
+
+h2. Summary
+
+*JAR/Library Approach:*
+- 11 detailed tasks (includes optional overloaded methods for internal token operations)
+- Separate adoption timeline per team
+
+*Prefetch + DB Approach:*
+- Batch Job (Lambda): 5 tasks
+- Application Changes: 5 tasks
+- Testing & Deployment: 2 tasks
+- Pool Management: 2 tasks
+
+*Impact at 50K cards/day:*
+- JAR Approach: 200K TOME calls/day (2 calls per operation)
+- Prefetch Approach: 100K TOME calls/day (50% reduction)
