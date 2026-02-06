@@ -1,0 +1,201 @@
+h1. RDS Proxy Multi-Region Deployment with Aurora Global Database
+
+*Deployed and configured cross-region RDS Proxy with automated password synchronization and documented implementation gotchas to support future multi-region deployments.*
+
+---
+
+h2. Overview
+
+When using RDS Proxy with Aurora Global Database across multiple regions (us-east-1 and us-west-2), password rotation creates a synchronization challenge:
+
+* Aurora Global Database replicates database user passwords automatically ✓
+* RDS Proxy reads credentials from Secrets Manager (not directly from database)
+* Secrets Manager rotation occurs only in primary region
+* Secondary region Secrets Manager becomes out of sync after first 24-hour rotation
+* Secondary RDS Proxy authentication fails
+
+h3. Solution Architecture
+
+Deployed and configured Lambda-based secret replication with automatic primary/secondary detection:
+
+* *Symmetric deployment* in both us-east-1 and us-west-2
+* *Rotation Lambda* + *Replication Lambda* in each region
+* Both Lambdas check {{pg_is_in_recovery()}} to detect cluster role
+* Only primary region executes rotation and replication
+* EventBridge triggers replication on secret changes
+* Cross-region communication via Transit Gateway
+* Automatic role reversal during failover
+
+h3. Implementation Details
+
+*Rotation Flow:*
+# Secrets Manager rotation Lambda triggers in primary region
+# Lambda checks {{pg_is_in_recovery()}} → returns false (writable)
+# Rotates password in primary Secrets Manager
+# Updates Aurora database password
+# EventBridge detects secret change → triggers Replication Lambda
+
+*Replication Flow:*
+# Replication Lambda triggered by EventBridge
+# Checks {{pg_is_in_recovery()}} → confirms primary role
+# Reads rotated secret from local Secrets Manager
+# Copies secret to remote region Secrets Manager via Transit Gateway
+# Both RDS Proxy instances now have identical credentials
+
+*Failover Behavior:*
+# Aurora Global Database failover promotes west to primary
+# {{pg_is_in_recovery()}} now returns false in west, true in east
+# Rotation/Replication Lambdas automatically execute in new primary (west)
+# Replication direction reverses: west → east
+# Zero manual intervention required
+
+---
+
+h2. Implementation Gotchas
+
+h3. Gotcha #1: Secrets Manager VPC Endpoint Subnet Placement
+
+*Problem:*
+* Lambda timeout errors in logs during cross-region replication
+* Replication failing between regions
+
+*Root Cause:*
+Secrets Manager VPC endpoint provisioned in *non-routable subnet* (no Transit Gateway attachment). Lambda in us-east-1 cannot reach us-west-2 for cross-region secret replication.
+
+*Fix:*
+{code}
+# Provision Secrets Manager VPC endpoint in routable subnet
+# Routable subnet = subnet with Transit Gateway attachment
+vpc_endpoint_subnet_ids = ["subnet-xxxxx"]  # Must be TGW-attached subnet
+{code}
+
+*Key Learning:*
+VPC endpoints for cross-region communication MUST be in subnets with Transit Gateway attachments. Isolated subnets will cause timeout failures.
+
+---
+
+h3. Gotcha #2: ECS Cluster Dual Secrets Manager Endpoint Conflict
+
+*Problem:*
+* Provisioning NEW ECS cluster fails
+* Error indicates conflict with multiple Secrets Manager VPC endpoints
+* Existing ECS clusters work fine
+
+*Root Cause:*
+When provisioning new ECS cluster, ECS encounters two Secrets Manager VPC endpoints (one in routable subnet for cross-region, one in isolated subnet for local access) and fails to determine which to use.
+
+*Fix:*
+{code:terraform}
+# Add to ECS module configuration
+byo_vpc_endpoint = "<secrets_manager_vpc_endpoint_id_in_routable_subnet>"
+{code}
+
+*Critical Notes:*
+* {color:red}NOT documented in module code{color}
+* {color:red}NOT documented in TFE registry README{color}
+* {color:green}Only found in SOL Engineers documentation{color}
+* Only affects NEW ECS deployments (existing clusters unaffected)
+* Required for anyone provisioning or updating ECS cluster configurations
+
+*Impact:*
+This will affect every team provisioning ECS in multi-region environments with cross-region VPC endpoint requirements.
+
+---
+
+h3. Gotcha #3: Farm Break False Alarm - Timestamp Flags
+
+*Initial Concern:*
+Two timestamp flags exist in Secrets Manager:
+* {{last_rotated}} - Updated by Rotation Lambda
+* {{last_value_changed}} - Updated by Replication Lambda
+
+Concern was that time discrepancy between these flags could trigger farm break alerts.
+
+*Clarification from DBA Team:*
+{panel:bgColor=#E3FCEF}
+Farm breaks check *{{last_rotated}}* flag ONLY.
+
+Farm breaks do NOT check {{last_value_changed}} flag.
+
+*No farm break risk from timestamp discrepancy.*
+{panel}
+
+*Status:* Non-issue. No remediation or evidence required.
+
+---
+
+h3. Gotcha #4: Aurora Reader Instance AZ Placement
+
+*Problem:*
+Deployed Aurora secondary cluster (us-west-2) with symmetric configuration (1 writer + 2 readers) across 4 AZ subnets. Both reader instances landed in same Availability Zone.
+
+*Root Cause:*
+* Aurora automatically selects AZ when {{availability_zone}} parameter not explicitly specified
+* Module does not support explicit AZ assignment for reader instances
+* Confirmed with Cloud team: Aurora's automatic placement can place instances in same AZ due to capacity optimization
+
+*Resolution:*
+Re-provisioned reader instance (reduced {{replica_count}} from 2→1→2). Aurora rebalanced and distributed readers across different AZs.
+
+*Key Learning:*
+* Aurora does NOT guarantee AZ distribution for reader instances
+* Module limitation: No explicit {{availability_zone}} control
+* Re-provisioning can trigger Aurora to redistribute instances
+* Especially critical for minimal configurations (1 writer + 1 reader) where single AZ failure affects all instances
+
+*Deployment Decision:*
+Deployed symmetric configuration (1 writer + 2 readers in both regions) to ensure:
+* Read-only endpoint HA (multiple reader targets)
+* Identical capacity in both regions
+* Simplified failover operations
+
+---
+
+h2. Production Status
+
+{panel:bgColor=#E3FCEF}
+✓ Deployed in production across us-east-1 and us-west-2
+
+✓ 24-hour password rotation cycles maintained
+
+✓ Zero manual intervention during DR failover
+
+✓ Symmetric deployment (1W + 2R in both regions)
+
+✓ Supports six 9s availability requirement (99.9999%)
+{panel}
+
+---
+
+h2. Architecture Diagrams
+
+*See attached Excalidraw diagrams:*
+* Normal Operations (us-east-1 primary → us-west-2 secondary)
+* Post-Failover (us-west-2 primary → us-east-1 secondary)
+
+---
+
+h2. References
+
+* Internal Confluence - RDS Proxy Multi-Region Setup (Kamal)
+* [AWS RDS Proxy Documentation|https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/rds-proxy.html]
+* [AWS Aurora Global Database|https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-global-database.html]
+* SOL Engineers - ECS VPC Endpoint Configuration
+
+---
+
+h2. Key Takeaways for Future Implementations
+
+# *Read the module code* - Official docs may be outdated or incomplete
+# *VPC endpoint placement matters* - Routable subnets required for cross-region
+# *ECS endpoint conflicts are real* - Use {{byo_vpc_endpoint}} for new clusters
+# *Aurora AZ placement is automatic* - No guarantee of distribution, may need re-provisioning
+# *Symmetric deployment simplifies operations* - Same config in both regions for operational consistency
+# *Test failover thoroughly* - Verify Lambda role reversal works automatically
+# *Document non-obvious gotchas* - Save future teams debugging time
+
+---
+
+_Deployed and configured by: Gaurav_
+_Reviewed by: Kamal (DBA Team)_
+_Deployed: January 2026_
