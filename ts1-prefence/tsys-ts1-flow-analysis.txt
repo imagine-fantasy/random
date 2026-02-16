@@ -1,0 +1,143 @@
+h1. TSYS TS1 — Fraud Alerts Flow & What It Supports
+
+{info:title=Purpose}
+This document captures what TSYS TS1 supports for fraud alert enablement so Product can make a decision on the Opt-In API design.
+{info}
+
+----
+
+h2. Our API Input Contract (for reference)
+
+{code:language=json}
+{
+  "cardToken": "<CARD_TOKEN>",
+  "email": {
+    "alert": true/false,
+    "emailAddresses": []
+  },
+  "mobile": {
+    "alert": true/false,
+    "mobileNumbers": []
+  }
+}
+{code}
+
+* *alert flags* (true/false) — always supported regardless of processor
+* *emailAddresses / mobileNumbers arrays* — what goes in here depends on what the processor supports
+
+----
+
+h2. TSYS TS1 — What It Supports
+
+|| Capability || Supported? || Details ||
+| Enable SMS fraud alerts | (/) Yes | Uses ALT4 mobile number already on the card |
+| Enable Email fraud alerts | (/) Yes | Uses email address already on the card |
+| Accept new mobile number via alerts flow | (x) No | Must already exist on the card via Attributes API |
+| Accept new email address via alerts flow | (x) No | Must already exist on the card via Attributes API |
+| Accept multiple mobile numbers | (x) No | Only one ALT4 mobile per card |
+| Accept multiple email addresses | (x) No | Only one email per card |
+| Update/change contacts via alerts flow | (x) No | Contacts are managed upstream, reflected after nightly batch |
+| Business phone for alerts | (x) No | Separate endpoint, not part of alerts |
+
+{note:title=Key Constraint}
+TSYS TS1 alerts work on a *"use what's already there"* model. You can turn channels ON or OFF, but you cannot supply or change the contact values through the alerts flow.
+{note}
+
+----
+
+h2. TSYS TS1 — End to End Flow
+
+h3. Step 1: Fetch Contacts from Card
+
+|| What || Details ||
+| API Call | GET Contacts for the card |
+| Returns | ALT4 mobile number (if present), Email (if present), Verification status |
+| Purpose | Find out what contact info exists on the card *right now* |
+
+h3. Step 2: Evaluate What's Available
+
+|| Card Has Mobile? || Card Has Email? || What Can We Do? ||
+| (/) Yes | (/) Yes | Can enable SMS + Email |
+| (/) Yes | (x) No | Can enable SMS only |
+| (x) No | (/) Yes | Can enable Email only |
+| (x) No | (x) No | Cannot enable anything |
+
+h3. Step 3: Set Alert Preference
+
+|| What || Details ||
+| API Call | POST Alert Preference for the card |
+| What it does | Turns on channels (SMS, Email) for FRAUD_TRANSACTION alert type |
+| What it uses | Contact values already on the card from Step 1 |
+| What it does NOT do | Does not accept, store, or forward any new contact values |
+
+----
+
+h2. TSYS TS1 — Scenario Table
+
+|| # || mobile.alert || email.alert || Card Has Mobile? || Card Has Email? || What TS1 Does || Result ||
+| 1 | true | true | (/) Yes | (/) Yes | Enables SMS + Email using card's ALT4 and email | {status:colour=Green|title=SUCCESS — BOTH ENABLED} |
+| 2 | true | true | (/) Yes | (x) No | Can only enable SMS; no email on card | {status:colour=Yellow|title=PARTIAL — SMS ONLY} or {status:colour=Red|title=REJECT} *(Product to decide)* |
+| 3 | true | true | (x) No | (/) Yes | Can only enable Email; no mobile on card | {status:colour=Yellow|title=PARTIAL — EMAIL ONLY} or {status:colour=Red|title=REJECT} *(Product to decide)* |
+| 4 | true | true | (x) No | (x) No | No contacts on card, nothing to enable | {status:colour=Red|title=REJECT — CONTACTS_NOT_FOUND} |
+| 5 | true | false | (/) Yes | Any | Enables SMS only using card's ALT4 | {status:colour=Green|title=SUCCESS — SMS ENABLED} |
+| 6 | true | false | (x) No | Any | SMS requested but no mobile on card | {status:colour=Red|title=REJECT — MOBILE_NOT_ON_CARD} |
+| 7 | false | true | Any | (/) Yes | Enables Email only using card's email | {status:colour=Green|title=SUCCESS — EMAIL ENABLED} |
+| 8 | false | true | Any | (x) No | Email requested but no email on card | {status:colour=Red|title=REJECT — EMAIL_NOT_ON_CARD} |
+| 9 | false | false | Any | Any | Nothing requested | {status:colour=Red|title=REJECT — NO_CHANNEL_REQUESTED} or treat as disable |
+
+----
+
+h2. What Happens to emailAddresses / mobileNumbers Arrays for TS1?
+
+{panel:borderColor=#0052CC|bgColor=#DEEBFF}
+Since TS1 *cannot accept new contact values*, the arrays serve no purpose for TS1 alert enablement.
+
+Three ways to handle this:
+
+*Approach A:* Arrays must be empty for TS1. If caller sends values → validation error.
+*Approach B:* Arrays are accepted but ignored for TS1. Values are not used for alert enablement.
+*Approach C:* Arrays accept a single value for TS1 → we validate it matches what's on the card. Mismatch → reject.
+
+This is a *Product decision* based on the caller experience you want.
+{panel}
+
+----
+
+h2. How Contacts Get On the Card (For Context)
+
+This is *not* part of our alerts flow, but explains where the data comes from:
+
+|| Contact || How It Gets Set || When It Reflects in Contacts ||
+| ALT4 Mobile | PUT via Attributes API by upstream systems | After *nightly batch* (not immediate) |
+| Email | PUT via Attributes API by upstream systems | After *nightly batch* (not immediate) |
+| Business Phone | POST/PATCH via separate endpoint | Not relevant to alerts |
+
+{note:title=Important}
+If a card was just created and the Attributes API was just called, the contacts may *not yet reflect* the new values until the overnight batch runs. This means a brand-new card may show no contacts even though they were just submitted upstream.
+{note}
+
+----
+
+h2. Summary — What TS1 Can and Cannot Do
+
+|| TS1 Can || TS1 Cannot ||
+| Turn SMS channel on/off for fraud alerts | Accept a new mobile number in the alerts call |
+| Turn Email channel on/off for fraud alerts | Accept a new email in the alerts call |
+| Use ALT4 mobile already on card for SMS | Support multiple mobile numbers per card |
+| Use email already on card for Email alerts | Support multiple emails per card |
+| Tell us what contacts exist on the card (GET) | Update or change contacts through the alerts flow |
+
+----
+
+h2. Decisions Needed from Product
+
+|| # || Decision || Context ||
+| 1 | If caller requests both channels but card only has one contact, is that PARTIAL success or REJECT? | Scenarios 2 and 3 above |
+| 2 | What do we do with emailAddresses/mobileNumbers arrays for TS1? (Approach A, B, or C above) | Impacts validation logic and caller contract |
+| 3 | If both flags are false, is that a disable operation or a validation error? | Scenario 9 above |
+
+----
+
+{note:title=Confidentiality}
+Do not include real endpoints, card numbers, or customer identifiers. Use placeholders only.
+{note}
