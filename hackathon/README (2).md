@@ -169,4 +169,4 @@ Read and triage the log file: your_log_file.log
 
 ## Hackathon Theme
 
-Business Processes — Product Requirements accelerator
+Developer Productivity — CI/CD copilot for failure diagnosis
