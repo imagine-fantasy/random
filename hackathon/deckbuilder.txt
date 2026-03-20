@@ -1,0 +1,112 @@
+Create a PowerPoint presentation called "AutoHeal AI — Pipeline Autopilot" for a JPMC internal hackathon submission. March 2026. Use JPMC styling.
+Slide 1 — Title slide
+Title: AutoHeal AI — Pipeline Autopilot
+Subtitle: Autonomous CI/CD Failure Resolution
+Team: Commercial Card Platform
+Date: March 2026
+Slide 2 — The Problem
+Title: The Hidden Cost of Pipeline Failures
+5 pain points:
+
+IaC & CI/CD — Terraform, Spinnaker and Jules pipeline failures disrupt development cycles and delay delivery
+Time Waste — Engineers spend 30-60 minutes per failure on manual log analysis, root cause identification and fixes
+Tool Switching — Switching between dashboards, logs, IDEs and documentation fragments productivity
+Module Identification — Pinpointing failed modules in our firm's custom Terraform is non-trivial and wastes time
+Recurring Failures — Bugs that surface only at runtime compound hidden costs and delay features
+
+Slide 3 — What We Built
+Title: An AI Agent That Reads Your Failure Logs and Triages in Seconds
+Key points:
+
+Built on JPMC SmartSDK with GPT via our LLM Sandbox — fully firm approved stack
+Engineer asks the agent to read a failure log — agent makes a tool call and reads the file directly
+Agent identifies root cause, failed stage, plain English explanation and concrete fix steps
+Triage report saved automatically
+Chat interface available for engineers who need to go deeper
+
+Slide 4 — Architecture
+Title: Multi-Agent System — How It Works
+Please leave a large placeholder box in the centre of this slide with the text: "INSERT ARCHITECTURE DIAGRAM HERE"
+Below the placeholder add these labels:
+
+Orchestrator Agent — routes failures, manages agent lifecycle
+Log Triage Agent — reads log, structured output (BUILT)
+Code Reader Agent — clones repo, reads firm custom modules (ROADMAP)
+Fix Agent — agentic loop, validates until build is clean (ROADMAP)
+PR Agent — raises PR, flags runtime vs review gaps (ROADMAP)
+Notification Agent — Teams and Email (ROADMAP)
+Built on: JPMC SmartSDK · GPT via LLM Sandbox · SequentialAgent orchestration
+
+Slide 5 — Demo
+Title: Demo — Fixing a Spinnaker and Terraform Failure in Seconds
+Three columns:
+Column 1 — Traditional Approach: Engineers spend 45 minutes manually scanning logs, identifying failed stages, searching modules, editing code
+Column 2 — AutoHeal AI Approach: Engineer asks agent to read the log file. Agent triages in under 10 seconds. Root cause, fix steps, report saved automatically
+Column 3 — Demo Scenario: Real Spinnaker pipeline failure with Terraform validation error. Agent reads file via tool call, returns structured triage instantly
+Slide 6 — What Can It Fix
+Title: What Can AutoHeal AI Fix?
+Four categories:
+
+Terraform Failures — variable type mismatches, missing required variables, resource dependency errors, provider configuration issues, custom module logic gaps
+Spinnaker Pipeline Failures — bake stage failures, deploy stage Terraform errors, expression evaluation failures, webhook and notification misconfigurations
+Jules Pipeline Failures — build stage failures, test stage failures, deployment manifest errors, environment variable and secret reference mismatches
+General CI/CD Failures — Dockerfile syntax errors, malformed YAML or JSON, IAM and policy errors, network and security group conflicts
+
+Slide 7 — What Makes It Powerful
+Title: What Makes AutoHeal AI Powerful
+Five features:
+
+Multi-Pipeline Support — Terraform, Spinnaker, Jules, GitHub Actions
+Agentic Loop — Fix agent iterates until build is clean, not just one attempt
+Firm-Aware — reads our custom Terraform modules, not just standard providers
+Human in the Loop — chat interface for engineers who want control
+Responsible AI — every change reviewed via PR, full audit trail, no blind deployments
+
+Slide 8 — Roadmap
+Title: The Roadmap — AutoHeal AI Embedded in Every Pipeline
+Short term:
+
+Phase 1 complete — log triage agent with browser chat UI, tool calling, working demo
+Phase 2 — code reader agent with RAG over firm codebase, semantic search over custom modules
+Mid term:
+Phase 3 — full agentic loop, fix agent validates locally before raising PR
+Long term:
+Phase 4 — enterprise scale, multi-repo support, compliance audit trails, custom LLM fine-tuning on firm infrastructure patterns
+
+Slide 9 — Metrics
+Title: Measurable Impact on Developer Productivity
+Table with two columns — Before and After AutoHeal AI:
+
+Time to identify failed module: 10-15 minutes → under 5 seconds
+Time to diagnose root cause: 15-20 minutes → under 10 seconds
+Time to craft a fix: 10-20 minutes → under 15 seconds
+Total MTTR per failure: 45-60 minutes → under 2 minutes
+Context switches required: 4-6 tools → 1 chat interface
+Knowledge dependency: Senior engineer required → any team member can run it
+Highlight box: MTTR cut 95% — from 60 minutes to under 2 minutes
+
+Slide 10 — Built With
+Title: Built With — Fully Firm Approved Stack
+Technologies:
+
+JPMC SmartSDK — agent framework, LLMAgent, tool calling, Developer UI
+GPT via JPMC LLM Sandbox — LLM backbone, no external API keys
+Python — agent logic, tool functions, file operations
+SmartSDK Developer UI — browser chat interface at localhost
+SequentialAgent orchestration — multi-agent workflow management
+Note: Everything runs on approved JPMC infrastructure. No external dependencies.
+
+Slide 11 — Getting Started
+Title: Get Started in 3 Steps
+Step 1: Install SmartSDK — pip install cdaosmart-sdk
+Step 2: Ensure LLM Sandbox token is active
+Step 3: Run python triage.py and open localhost:8000
+That is it. No extra infrastructure. No setup. Place your log file and ask the agent to read it.
+Slide 12 — Closing
+Title: AutoHeal AI — Stop Reading Logs. Start Shipping Fixes
+Key points:
+01 — Unavoidable Failures: Pipeline failures are unavoidable in DevOps, but resolution time can be dramatically reduced with automation
+02 — Rapid AI Analysis: AutoHeal AI transforms debugging into rapid AI-driven analysis, cutting resolution from 45 minutes to under 2 minutes
+03 — Engineer Oversight: Human-in-the-loop design ensures engineers retain full control and oversight, maintaining safety and trust
+04 — CI/CD Integration: AutoHeal AI enables autonomous fix and PR workflows and accelerates delivery cycles
+05 — Built at JPMC Hackathon March 2026 — Commercial Card Platform Team
