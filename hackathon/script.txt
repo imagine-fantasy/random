@@ -4,14 +4,14 @@ Here's the final script:
 "Hi everyone, I'm Gaurav from the commercial card platform team. Today we're presenting our hackathon submission — AutoHeal AI, a CI/CD Log Triage Agent built on JPMC SmartSDK. Before I jump into the demo, let me set the context with a problem we face every single day."
 
 [0:30 — 1:15] Hook
-"Every engineer on the team has hit this. A Terraform apply fails in the pipeline. We're scanning through hundreds of lines of logs trying to find what broke — was it the plan, the apply, a custom module behaving differently than expected?
-And here's the thing about our firm's Terraform — we don't use standard providers. We use custom internal modules. Modules that look correct at review time but behave differently at runtime. Someone approves the PR in good faith, everything looks fine, and the bug only surfaces three days later when the pipeline runs.
+"Every engineer on the team has hit this. A Terraform apply fails in the pipeline. We're scanning through hundreds of lines of logs trying to find what broke — was it the plan, the apply, a configuration mismatch?
+And here's the thing about our firm's Terraform — we don't use standard providers. We use custom internal modules. And sometimes things fail at runtime — the module might have an edge case, it might not be used correctly, there might be a configuration mismatch that only surfaces when the pipeline actually runs. You need to read the module documentation, check how it's being called, understand the context. That's not quick — and that's exactly where we lose the most time.
 That manual diagnosis process — switching between dashboards, logs, IDEs, documentation — takes 30 minutes to over an hour every single time. We wanted to solve this."
 
 [1:15 — 2:30] Live demo
-"So we built AutoHeal AI — a CI/CD Log Triage Agent leveraging JPMC SmartSDK as the agent framework, with GPT through our LLM Sandbox. Fully firm approved stack, no external API keys.
+"So we built AutoHeal AI — leveraging JPMC SmartSDK as the agent framework, with GPT through our LLM Sandbox. Fully firm approved stack, no external API keys.
 Let me show you how it works.
-We have a failure log file here — already placed on the machine. A real pipeline failure. I'm going to ask the agent to read it directly — watch what happens."
+We have a failure log file here — already placed on the machine. I'm going to ask the agent to read it directly — watch what happens."
 Type in chat: Read and triage the log file: sample_failure.log
 "SmartSDK's tool calling capability means the agent is actually reading the file off disk right now. Nothing pasted, nothing hardcoded. The agent is doing that itself."
 Wait for response. Pause. Let it land.
@@ -23,7 +23,7 @@ That entire process — under 10 seconds. We'd spend 45 minutes getting here man
 [2:30 — 3:15] Chat interface
 "SmartSDK provides a browser chat interface out of the box — and we leveraged that deliberately.
 We didn't want this to feel like a black box that just runs and you hope it got it right. Engineers need to stay in control. So the chat interface is always there.
-You can ask follow-up questions — what does this error code mean, has this module caused issues before, what's the safest rollback path, should I fix this now or raise it with the team.
+You can ask follow-up questions — what does this error code mean, has this module been used correctly, what's the safest fix, should I raise this with the team.
 The agent is conversational. It remembers the context of what it just read. We stay in the loop when we want to be — and it handles things autonomously when we don't. That balance between automation and oversight was important to us."
 
 [3:15 — 4:15] Architecture
@@ -31,14 +31,14 @@ Show diagram.
 "What you just saw is Phase 1. Here's the full multi-agent system we've designed.
 At the top — a pipeline failure triggers the orchestrator. The orchestrator routes by failure type and manages the full agent lifecycle using SmartSDK's SequentialAgent workflow.
 First — the log triage agent. That's what you just saw running. Reads the log, structured output, done.
-Second — the code reader agent. This is where it gets firm-specific. It clones the repository and reads our custom Terraform modules using semantic search — understanding what the module was supposed to do versus what the error is saying. This is the agent that catches the gap between what was reviewed and what actually runs.
+Second — the code reader agent. This is where it gets firm-specific. It clones the repository and reads our custom Terraform modules using semantic search — understanding what the module is supposed to do, how it's being called, and whether there's an edge case or misconfiguration causing the failure.
 Third — the fix agent. This one runs an agentic loop. It generates a candidate fix, runs a local plan or build, checks the output. If errors remain — it iterates. Fix, validate, fix again — until the build is clean. It doesn't stop at one attempt.
-Fourth — the PR agent raises the pull request with the fix applied and flags whether this was a runtime issue or a review gap.
+Fourth — the PR agent raises the pull request with the fix applied.
 Finally — the notification agent sends a Teams message or email. On-call engineer gets a summary, a PR link, and the fix is already waiting for review."
 
 [4:15 — 4:40] Why this matters
-"The Terraform angle is particularly important for us. We use custom modules that don't behave like standard providers. Bugs surface at runtime, not at review. We approve the PR, everything looks correct, the apply fails days later. Nobody currently flags that gap.
-The PR agent we've designed will — every fix is tagged with whether it was a runtime issue or a review gap. That's visibility into where the process broke, not just what broke. That's how we stop recurring failures."
+"The Terraform angle is particularly important for us. We use custom modules that don't behave like standard providers. Failures surface at runtime — the module might have an edge case, it might not be configured correctly for this specific use case. Right now diagnosing that takes significant time and expertise.
+The code reader agent we've designed understands that context — it reads the module, checks how it's being used, identifies the gap. That's the intelligence that makes this more than just a log parser."
 
 [4:40 — 5:00] Close
 "The numbers are simple. We lose 30 to 60 minutes every time a pipeline fails just on diagnosis alone. With AutoHeal AI — under 2 minutes. That's a 95% reduction in MTTR.
