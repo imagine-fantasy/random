@@ -1,0 +1,30 @@
+[0:00 — 0:30] Introduction
+"Hi everyone, I'm Gaurav from the commercial card platform team. Today we're presenting our hackathon submission — a CI/CD Log Triage Agent built on JPMC SmartSDK. Before I jump into the demo, let me set the context with a problem we face every single day."
+
+[0:30 — 1:00] Hook
+"Every engineer on the team has hit this. A Terraform apply fails in the pipeline. We're scanning through hundreds of lines of logs trying to find what broke — was it the plan, the apply, a custom module behaving differently than expected? Someone approved the PR, everything looked fine, but the bug only shows up at runtime. That manual diagnosis takes 30 minutes to over an hour. We wanted to solve this."
+
+[1:00 — 2:00] Live demo
+"So we built a CI/CD Log Triage Agent on JPMC SmartSDK with GPT through our LLM Sandbox. Let me show you how it works.
+We have a failure log file here — already placed on the machine. We're going to ask the agent to read it directly."
+Type in chat: Read and triage the log file: sample_failure.log
+"The agent is making a tool call — actually reading the file off disk. Nothing pasted, nothing hardcoded.
+Wait for response.
+"Root cause in one sentence. Failed stage. Plain English explanation. Three concrete fix steps. Triage report saved automatically. Under 10 seconds. We'd spend 45 minutes getting here manually."
+
+[2:00 — 2:45] Chat interface
+"We also built a chat interface for when engineers need to go deeper — ask follow-up questions, explore the fix, understand the context. We stay in the loop when we want to, agent handles it autonomously when we don't. That flexibility was a deliberate design decision — we didn't want this to feel like a black box."
+
+[2:45 — 4:00] Architecture
+Show diagram.
+"What you just saw is Phase 1. Here's the full system we've designed.
+A pipeline failure triggers the orchestrator. It routes by failure type and manages the agent lifecycle using a sequential workflow.
+The log triage agent diagnoses. The code reader agent clones the repo and reads our firm's custom Terraform modules using semantic search — understanding what the module should do versus what the error says.
+Then the fix agent enters an agentic loop. It generates a fix, runs a local plan or build, validates, iterates if errors remain — until the build is clean. Then hands off to the PR agent."
+
+[4:00 — 4:30] Why this matters
+"Terraform is a particularly strong use case because we use custom modules that don't behave like standard providers. Bugs surface at runtime, not at review. We approve the PR, everything looks correct, the apply fails three days later. Nobody currently flags that gap. The PR agent will — marking every fix with whether it was a runtime issue or a review gap. Visibility into where the process broke, not just what broke."
+
+[4:30 — 5:00] Close
+"The numbers are simple. We lose 30 to 60 minutes every time a pipeline fails just on diagnosis alone. With this agent — under 2 minutes. Phase 1 is built and running today. The full loop — code reader, fix agent, PR automation, Teams and email notification — that's the roadmap we've laid out.
+We're not replacing engineers. We built this to replace the parts of the job nobody wants to do. Thank you."
