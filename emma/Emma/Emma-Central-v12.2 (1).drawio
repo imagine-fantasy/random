@@ -1,0 +1,575 @@
+<mxfile host="app.diagrams.net" pages="4">
+  <diagram name="Diagram 1 — Session Lifecycle" id="lCl4MPdMbZJQ6DQlDesM">
+    <mxGraphModel dx="1945" dy="914" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1920" pageHeight="1200" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=20;fontStyle=1;fontColor=#1a1a2e;" value="Emma — Squad Session Lifecycle Architecture" vertex="1">
+          <mxGeometry height="30" width="1840" x="30" y="10" as="geometry" />
+        </mxCell>
+        <mxCell id="legend" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=10;fontStyle=2;fontColor=#555555;" value="Solid = data flow  ·  Dashed = async / lifecycle  ·  🟠 Emotion path  ·  🟣 Write Intercept  ·  🟡 Bidirectional Nexus" vertex="1">
+          <mxGeometry height="20" width="1840" x="30" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="bg1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f4f8;strokeColor=#6c8ebf;strokeWidth=2;" value="" vertex="1">
+          <mxGeometry height="720" width="360" x="30" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="bg2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f9f9f9;strokeColor=#6c8ebf;strokeWidth=2;" value="" vertex="1">
+          <mxGeometry height="720" width="1070" x="410" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="bg3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff0e6;strokeColor=#d79b00;strokeWidth=2;" value="" vertex="1">
+          <mxGeometry height="720" width="370" x="1500" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="bgp" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff8ee;strokeColor=#d6b656;strokeWidth=2;" value="" vertex="1">
+          <mxGeometry height="320" width="1840" x="30" y="810" as="geometry" />
+        </mxCell>
+        <mxCell id="h1" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=14;fontStyle=1;fontColor=#1a5490;" value="PHASE 1 — Session Spin-Up" vertex="1">
+          <mxGeometry height="30" width="360" x="30" y="85" as="geometry" />
+        </mxCell>
+        <mxCell id="h2" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=14;fontStyle=1;fontColor=#333333;" value="🔄 PHASE 2 - In-Session Loop" vertex="1">
+          <mxGeometry height="30" width="1070" x="410" y="85" as="geometry" />
+        </mxCell>
+        <mxCell id="h3" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=14;fontStyle=1;fontColor=#995500;" value="&amp;nbsp;PHASE 3 — Session Spin-Down" vertex="1">
+          <mxGeometry height="30" width="370" x="1500" y="85" as="geometry" />
+        </mxCell>
+        <mxCell id="hp" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=14;fontStyle=1;fontColor=#8a6d00;" value="SHARED PERSISTENCE LAYER - Local Stores + Upper Intelligence" vertex="1">
+          <mxGeometry height="30" width="1840" x="30" y="820" as="geometry" />
+        </mxCell>
+        <mxCell id="t1a" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;fontStyle=1;" value="Zoom Call Detected&lt;br&gt;Emma attaches as audio participant" vertex="1">
+          <mxGeometry height="70" width="320" x="50" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="a1" edge="1" parent="1" source="t1a" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#6c8ebf;strokeWidth=2;fontSize=9;" target="p0" value="F1a">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="a2" edge="1" parent="1" source="t1b" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#6c8ebf;strokeWidth=2;fontSize=9;" target="p0" value="F1b">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="p1" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" value="1.0&#xa;STT · Diarization&#xa;Emotion Detection&#xa;Speaker ID" vertex="1">
+          <mxGeometry height="110" width="210" x="430" y="210" as="geometry" />
+        </mxCell>
+        <mxCell id="p5" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" value="5.0&#xa;Emotion-Aware Response&#xa;TTS · Canvas · Jira" vertex="1">
+          <mxGeometry height="110" width="210" x="1000" y="210" as="geometry" />
+        </mxCell>
+        <mxCell id="aClaim1" edge="1" parent="1" source="p1" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#FF8C00;strokeWidth=4;fontSize=10;fontStyle=1;fontColor=#995500;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="p5" value="🟠 F3: emotion direct-route">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="a3" edge="1" parent="1" source="p1" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#82b366;strokeWidth=2;fontSize=9;exitX=0.25;exitY=1;exitDx=0;exitDy=0;entryX=0.25;entryY=0;entryDx=0;entryDy=0;" target="p2" value="F2: text + speaker + emotion">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="a4" edge="1" parent="1" source="p2" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#82b366;strokeWidth=2;fontSize=9;exitX=1;exitY=0.35;exitDx=0;exitDy=0;entryX=0;entryY=0.35;entryDx=0;entryDy=0;" target="p3" value="F4: query">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="a5" edge="1" parent="1" source="p3" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#82b366;strokeWidth=2;fontSize=9;dashed=1;exitX=0;exitY=0.7;exitDx=0;exitDy=0;entryX=1;entryY=0.7;entryDx=0;entryDy=0;" target="p2" value="F8: context">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="a6" edge="1" parent="1" source="p2" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#82b366;strokeWidth=2;fontSize=9;exitX=0.75;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=1;entryDx=0;entryDy=0;" target="p5" value="F9: generate">
+          <mxGeometry relative="1" x="0.4911" y="-4" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="1152" y="386" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="a10" edge="1" parent="1" source="p2" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#9673a6;strokeWidth=3;fontSize=10;fontStyle=1;fontColor=#553366;exitX=0.25;exitY=1;exitDx=0;exitDy=0;entryX=0.25;entryY=0;entryDx=0;entryDy=0;" target="p4" value="F11: intercept">
+          <mxGeometry relative="1" x="-0.6176" y="-11" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="o1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;fontStyle=1;" value="🔊 TTS Voice&#xa;Response to team" vertex="1">
+          <mxGeometry height="50" width="220" x="1240" y="180" as="geometry" />
+        </mxCell>
+        <mxCell id="o2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;fontStyle=1;" value="🖼 Canvas&#xa;Visual output (one-way)" vertex="1">
+          <mxGeometry height="50" width="220" x="1240" y="245" as="geometry" />
+        </mxCell>
+        <mxCell id="o3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;fontStyle=1;" value="📋 Jira&#xa;Live writing during call" vertex="1">
+          <mxGeometry height="50" width="220" x="1240" y="310" as="geometry" />
+        </mxCell>
+        <mxCell id="a7" edge="1" parent="1" source="p5" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#82b366;strokeWidth=2;fontSize=9;" target="o1" value="F10a: voice">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="a8" edge="1" parent="1" source="p5" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#82b366;strokeWidth=2;fontSize=9;" target="o2" value="F10b: canvas">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="a9" edge="1" parent="1" source="p5" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#82b366;strokeWidth=2;fontSize=9;" target="o3" value="F10c: jira write">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="em" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff8ee;strokeColor=#FF8C00;fontSize=9;align=left;fontStyle=2;" value="Emotion Adaptation Logic&#xa;😤 Frustrated → softer · slow down · more context&#xa;😕 Confused → analogy · draw on Canvas · break down&#xa;💪 Confident → direct · skip hand-holding&#xa;🙅 Pushback → acknowledge · re-explain with evidence" vertex="1">
+          <mxGeometry height="110" width="340" x="1120" y="460" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=11;fontStyle=1;" value="&amp;nbsp;Call Ends / Session Closes" vertex="1">
+          <mxGeometry height="50" width="330" x="1520" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" value="6.0&#xa;Finalise MoM&#xa;Structured meeting summary" vertex="1">
+          <mxGeometry height="80" width="260" x="1555" y="220" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" value="7.0&#xa;Session Compression&#xa;D3 state → D2 persistent" vertex="1">
+          <mxGeometry height="80" width="260" x="1555" y="340" as="geometry" />
+        </mxCell>
+        <mxCell id="a11" edge="1" parent="1" source="e1" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#d79b00;strokeWidth=2;" target="e2" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="a12" edge="1" parent="1" source="e2" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#d79b00;strokeWidth=2;" target="e3" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="a13" edge="1" parent="1" source="e3" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#d79b00;strokeWidth=2;" target="e4" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="a14" edge="1" parent="1" source="e4" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#d79b00;strokeWidth=2;" target="e5" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="d1" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=10;fontStyle=1;" value="D1 · Static Knowledge Store&#xa;Weaviate · Vectorless / PageIndex&#xa;Architecture Docs · Runbooks · Policies" vertex="1">
+          <mxGeometry height="130" width="370" x="70" y="870" as="geometry" />
+        </mxCell>
+        <mxCell id="d2" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=10;fontStyle=1;" value="D2 · Dynamic Memory Store&#xa;Qdrant · ColBERT + Dense Hybrid&#xa;Decisions · Constraints · Discarded · Outcomes" vertex="1">
+          <mxGeometry height="130" width="370" x="460" y="870" as="geometry" />
+        </mxCell>
+        <mxCell id="d3" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=10;fontStyle=1;" value="D3 · Session Checkpoint Store&#xa;Persistent agent state&#xa;Turns · Tool history · Resumption" vertex="1">
+          <mxGeometry height="130" width="370" x="870" y="870" as="geometry" />
+        </mxCell>
+        <mxCell id="nx" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=3;fontSize=11;fontStyle=1;" value="&amp;nbsp;NEXUS - Upper Intelligence Layer&lt;br&gt;Cross-squad aggregation · Duplication · Dependency · Discarded Tracking&lt;br&gt;Commercial Card · Payments · CIB · Enterprise" vertex="1">
+          <mxGeometry height="90" width="580" x="1270" y="870" as="geometry" />
+        </mxCell>
+        <mxCell id="ap0" edge="1" parent="1" source="p0" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#6c8ebf;strokeWidth=2;fontSize=9;" target="p1" value="session start">
+          <mxGeometry relative="1" x="-0.1549" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ap3" edge="1" parent="1" source="p3" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#d6b656;strokeWidth=2;fontSize=9;exitX=0.15;exitY=1;exitDx=0;exitDy=0;" target="d1" value="F5: static query">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ap4" edge="1" parent="1" source="p3" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#d6b656;strokeWidth=2;fontSize=9;exitX=0.4;exitY=1;exitDx=0;exitDy=0;" target="d2" value="F6: dynamic query">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="apClaim3pull" edge="1" parent="1" source="p3" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#d6b656;strokeWidth=4;fontSize=10;fontStyle=1;fontColor=#8a6d00;exitX=0.85;exitY=1;exitDx=0;exitDy=0;" target="nx" value="🟡 F7: Nexus pull (cross-squad)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ap5" edge="1" parent="1" source="p2" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#d6b656;strokeWidth=2;fontSize=9;dashed=1;exitX=1;exitY=1;exitDx=0;exitDy=0;" target="d3" value="checkpoint">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="apClaim3push" edge="1" parent="1" source="e4" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#d6b656;strokeWidth=4;fontSize=10;fontStyle=1;fontColor=#8a6d00;" target="nx" value="🟡 F13: Nexus batch push">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ap6" edge="1" parent="1" source="p4" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#9673a6;strokeWidth=3;fontSize=10;fontStyle=1;fontColor=#553366;" target="d2" value="F12: tagged write">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ap7" edge="1" parent="1" source="e3" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#d79b00;strokeWidth=2;fontSize=9;" target="d2" value="drain D3 → D2">
+          <mxGeometry relative="1" x="0.1007" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e5" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;fontStyle=1;" value="Emma Detaches&#xa;Session terminated" vertex="1">
+          <mxGeometry height="50" width="260" x="1555" y="580" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=3;fontSize=10;fontStyle=1;" value="8.0&#xa;Batch Push to Nexus&#xa;Cross-squad knowledge object" vertex="1">
+          <mxGeometry height="80" width="260" x="1555" y="460" as="geometry" />
+        </mxCell>
+        <mxCell id="p3" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" value="3.0&#xa;Knowledge Retrieval&#xa;Local: D1 + D2&#xa;Cross-squad: Nexus pull (F7)" vertex="1">
+          <mxGeometry height="110" width="220" x="830" y="380" as="geometry" />
+        </mxCell>
+        <mxCell id="p2" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" value="2.0&#xa;Agentic Orchestration&#xa;LLM · Intent · Routing&#xa;Tool Selection" vertex="1">
+          <mxGeometry height="110" width="220" x="500" y="380" as="geometry" />
+        </mxCell>
+        <mxCell id="p4" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;strokeWidth=3;fontSize=10;fontStyle=1;" value="4.0&#xa;Write Intercept&#xa;Tag · Structure&#xa;problem · constraint&#xa;discarded · outcome" vertex="1">
+          <mxGeometry height="130" width="220" x="500" y="560" as="geometry" />
+        </mxCell>
+        <mxCell id="p0" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" value="0.0&#xa;Session Initialisation&#xa;Load squad context&#xa;Init session state" vertex="1">
+          <mxGeometry height="100" width="200" x="110" y="400" as="geometry" />
+        </mxCell>
+        <mxCell id="t1b" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;fontStyle=1;" value="Curated Onboarding Session&lt;br&gt;New joiner initiates walkthrough" vertex="1">
+          <mxGeometry height="70" width="320" x="50" y="220" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram name="Diagram 2 — Platform Hierarchy" id="NhC5OPTfu-xaN7PlF5LB">
+    <mxGraphModel dx="3306" dy="1554" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="fBxARoSI_EC12xjOjr6k-31" edge="1" parent="1" source="fBxARoSI_EC12xjOjr6k-26" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#6c8ebf;strokeWidth=2;" target="fBxARoSI_EC12xjOjr6k-15" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fBxARoSI_EC12xjOjr6k-1" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=20;fontStyle=1;fontColor=#1a1a2e;" value="Emma Platform — Institutional Memory Architecture" vertex="1">
+          <mxGeometry height="32" width="1000" x="1090" y="570" as="geometry" />
+        </mxCell>
+        <mxCell id="fBxARoSI_EC12xjOjr6k-2" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=11;fontStyle=2;fontColor=#666666;" value="Knowledge flows UP (solid arrows) · Intelligence pushes DOWN (dashed arrows) · Every sub-LOB has its own Nexus" vertex="1">
+          <mxGeometry height="18" width="1000" x="1090" y="602" as="geometry" />
+        </mxCell>
+        <mxCell id="fBxARoSI_EC12xjOjr6k-3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1a1a2e;strokeColor=#9673a6;fontSize=11;fontColor=#ffffff;align=left;" value="ENTERPRISE NEXUS&lt;br&gt;&lt;br&gt;Frontier LLM · Enterprise Vector DB (Qdrant / Pinecone)&lt;br&gt;Rolls up ALL LOBs: CIB · CCB · AWM · CT&lt;br&gt;&lt;br&gt;· Cross-LOB pattern detection · Org-wide duplication identification&lt;br&gt;· Discarded decision tracking + constraint resolution monitoring&lt;br&gt;· Pushes resolved constraints back down to all LOB Nexuses&lt;br&gt;· Strategic dependency mapping · Systemic inefficiency surfacing&lt;br&gt;&lt;br&gt;↑ Batch pull from ALL LOB Nexuses (sprint cadence)&lt;br&gt;↓ Event-driven push back down to LOBs and Emmas&lt;br&gt;↔ Emma pulls from Nexus on-demand mid-meeting (no direct Emma-to-Emma)&lt;br&gt;&lt;br&gt;Alerts to:&amp;nbsp; Architecture Leadership · Impacted PO" vertex="1">
+          <mxGeometry height="280" width="1760" x="410" y="632" as="geometry" />
+        </mxCell>
+        <mxCell id="fBxARoSI_EC12xjOjr6k-4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#333333;fontSize=10;fontStyle=1;align=left;" value="THE PLAYBOOK&#xa;&#xa;Same pattern at every level:&#xa;Emmas → sub-LOB Nexus&#xa;→ LOB Nexus → Enterprise&#xa;&#xa;Sonnet LLM at sub-LOB&#xa;Frontier LLM at LOB+&#xa;&#xa;Knowledge UP (batch)&#xa;Intelligence DOWN (event)" vertex="1">
+          <mxGeometry height="280" width="200" x="2210" y="632" as="geometry" />
+        </mxCell>
+        <mxCell id="fBxARoSI_EC12xjOjr6k-5" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=10;fontStyle=1;" value="CIB NEXUS&#xa;Frontier LLM&#xa;Rolls up: Payments + Markets + Banking&#xa;Cross sub-LOB architectural patterns&#xa;MD level alerts · Architecture leadership&#xa;↑ batch · ↓ push" vertex="1">
+          <mxGeometry height="160" width="860" x="410" y="1012" as="geometry" />
+        </mxCell>
+        <mxCell id="fBxARoSI_EC12xjOjr6k-6" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;fontStyle=1;" value="CCB LOB NEXUS&#xa;Frontier LLM&#xa;Rolls up: CCB sub-LOBs&#xa;LOB leadership alerts&#xa;↑ batch · ↓ push" vertex="1">
+          <mxGeometry height="160" width="280" x="1290" y="1012" as="geometry" />
+        </mxCell>
+        <mxCell id="fBxARoSI_EC12xjOjr6k-7" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" value="AWM LOB NEXUS&#xa;Frontier LLM&#xa;Rolls up: AWM sub-LOBs&#xa;LOB leadership alerts&#xa;↑ batch · ↓ push" vertex="1">
+          <mxGeometry height="160" width="280" x="1590" y="1012" as="geometry" />
+        </mxCell>
+        <mxCell id="fBxARoSI_EC12xjOjr6k-8" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;fontStyle=1;" value="CT LOB NEXUS&#xa;Frontier LLM&#xa;Rolls up: CT sub-LOBs&#xa;LOB leadership alerts&#xa;↑ batch · ↓ push" vertex="1">
+          <mxGeometry height="160" width="280" x="1890" y="1012" as="geometry" />
+        </mxCell>
+        <mxCell id="fBxARoSI_EC12xjOjr6k-9" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;fontStyle=1;" value="PAYMENTS NEXUS&#xa;Frontier LLM&#xa;Rolls up: Comm Card + Trades + others&#xa;Cross sub-LOB pattern detection&#xa;Duplication alerts · Constraint monitoring&#xa;LOB leadership alerts · ↑ batch · ↓ push" vertex="1">
+          <mxGeometry height="160" width="360" x="410" y="1282" as="geometry" />
+        </mxCell>
+        <mxCell id="fBxARoSI_EC12xjOjr6k-10" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;fontStyle=1;" value="MARKETS NEXUS&#xa;Frontier LLM&#xa;Rolls up: Markets squads&#xa;Cross-squad patterns&#xa;LOB alerts · ↑ batch · ↓ push" vertex="1">
+          <mxGeometry height="160" width="240" x="790" y="1282" as="geometry" />
+        </mxCell>
+        <mxCell id="fBxARoSI_EC12xjOjr6k-11" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;fontStyle=1;" value="BANKING NEXUS&#xa;Frontier LLM&#xa;Rolls up: Banking squads&#xa;Cross-squad patterns&#xa;LOB alerts · ↑ batch · ↓ push" vertex="1">
+          <mxGeometry height="160" width="240" x="1050" y="1282" as="geometry" />
+        </mxCell>
+        <mxCell id="fBxARoSI_EC12xjOjr6k-12" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;fontStyle=2;" value="CCB Sub-LOBs&#xa;Nexuses (same pattern)" vertex="1">
+          <mxGeometry height="160" width="240" x="1310" y="1282" as="geometry" />
+        </mxCell>
+        <mxCell id="fBxARoSI_EC12xjOjr6k-13" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=2;" value="AWM Sub-LOBs&#xa;Nexuses (same pattern)" vertex="1">
+          <mxGeometry height="160" width="240" x="1570" y="1282" as="geometry" />
+        </mxCell>
+        <mxCell id="fBxARoSI_EC12xjOjr6k-14" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;fontStyle=2;" value="CT Sub-LOBs&#xa;Nexuses (same pattern)" vertex="1">
+          <mxGeometry height="160" width="240" x="1830" y="1282" as="geometry" />
+        </mxCell>
+        <mxCell id="fBxARoSI_EC12xjOjr6k-15" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;fontStyle=1;" value="Comm Card NEXUS&#xa;LLM · Cross-squad patterns&#xa;Duplication · Discarded decisions&#xa;Constraint tracking · PO alerts&#xa;↑ pulls from CC Emmas · ↓ pushes back" vertex="1">
+          <mxGeometry height="150" width="280" x="410" y="1552" as="geometry" />
+        </mxCell>
+        <mxCell id="fBxARoSI_EC12xjOjr6k-16" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;fontStyle=1;" value="Trades NEXUS&#xa;LLM · Cross-squad patterns&#xa;Duplication · Discarded decisions&#xa;Constraint tracking · PO alerts&#xa;↑ pulls from Trades Emmas · ↓ pushes back" vertex="1">
+          <mxGeometry height="150" width="280" x="710" y="1552" as="geometry" />
+        </mxCell>
+        <mxCell id="fBxARoSI_EC12xjOjr6k-17" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;fontStyle=1;" value="Markets NEXUS&#xa;LLM · Cross-squad patterns&#xa;PO alerts · ↑ ↓" vertex="1">
+          <mxGeometry height="150" width="240" x="1010" y="1552" as="geometry" />
+        </mxCell>
+        <mxCell id="fBxARoSI_EC12xjOjr6k-18" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;fontStyle=1;" value="Banking NEXUS&#xa;LLM · Cross-squad patterns&#xa;PO alerts · ↑ ↓" vertex="1">
+          <mxGeometry height="150" width="240" x="1270" y="1552" as="geometry" />
+        </mxCell>
+        <mxCell id="fBxARoSI_EC12xjOjr6k-19" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;fontStyle=2;" value="CCB · AWM · CT&#xa;Sub-LOB Nexuses&#xa;(same pattern repeats)" vertex="1">
+          <mxGeometry height="150" width="280" x="1530" y="1552" as="geometry" />
+        </mxCell>
+        <mxCell id="fBxARoSI_EC12xjOjr6k-20" parent="1" style="swimlane;startSize=22;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;fontStyle=1;" value="Emma — Squad 1 (full detail)&#xa;1.0 STT · Diarization · Emotion Detection&#xa;2.0 Agentic Orchestration · LLM · Intent · Routing&#xa;3.0 Knowledge Retrieval: Vectorless→Weaviate · ColBERT→Qdrant&#xa;4.0 Write Intercept: problem·constraint·discarded·outcome·date&#xa;5.0 Output: TTS · Canvas · Jira · MoM · Email · MCP Tools" vertex="1">
+          <mxGeometry height="190" width="560" x="410" y="1812" as="geometry" />
+        </mxCell>
+        <mxCell id="fBxARoSI_EC12xjOjr6k-21" parent="fBxARoSI_EC12xjOjr6k-20" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" value="1.0 STT · Diarization · Emotion" vertex="1">
+          <mxGeometry height="28" width="250" x="10" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="fBxARoSI_EC12xjOjr6k-22" parent="fBxARoSI_EC12xjOjr6k-20" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" value="2.0 Agentic Orchestration · LLM" vertex="1">
+          <mxGeometry height="28" width="270" x="270" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="fBxARoSI_EC12xjOjr6k-23" parent="fBxARoSI_EC12xjOjr6k-20" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=9;" value="3.0 Retrieval: Vectorless→D1 · ColBERT→D2" vertex="1">
+          <mxGeometry height="28" width="530" x="10" y="66" as="geometry" />
+        </mxCell>
+        <mxCell id="fBxARoSI_EC12xjOjr6k-24" parent="fBxARoSI_EC12xjOjr6k-20" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=9;" value="4.0 Write Intercept: problem · constraint · discarded · outcome" vertex="1">
+          <mxGeometry height="28" width="530" x="10" y="102" as="geometry" />
+        </mxCell>
+        <mxCell id="fBxARoSI_EC12xjOjr6k-25" parent="fBxARoSI_EC12xjOjr6k-20" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" value="5.0 Output: TTS · Canvas · Jira · MoM · Email · MCP Tools" vertex="1">
+          <mxGeometry height="28" width="530" x="10" y="138" as="geometry" />
+        </mxCell>
+        <mxCell id="fBxARoSI_EC12xjOjr6k-26" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;fontStyle=2;" value="Emma Squads 2–30&#xa;Commercial Card&#xa;(same architecture)" vertex="1">
+          <mxGeometry height="80" width="200" x="990" y="1852" as="geometry" />
+        </mxCell>
+        <mxCell id="fBxARoSI_EC12xjOjr6k-27" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;fontStyle=2;" value="Emma Squads 31–80&#xa;Trades&#xa;(same architecture)" vertex="1">
+          <mxGeometry height="80" width="200" x="1210" y="1852" as="geometry" />
+        </mxCell>
+        <mxCell id="fBxARoSI_EC12xjOjr6k-28" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;fontStyle=2;" value="Emma Squads&#xa;Markets&#xa;(same architecture)" vertex="1">
+          <mxGeometry height="80" width="200" x="1430" y="1852" as="geometry" />
+        </mxCell>
+        <mxCell id="fBxARoSI_EC12xjOjr6k-29" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;fontStyle=2;" value="Emma Squads: Banking · CCB · AWM · CT&#xa;(same architecture throughout)" vertex="1">
+          <mxGeometry height="80" width="320" x="1650" y="1852" as="geometry" />
+        </mxCell>
+        <mxCell id="fBxARoSI_EC12xjOjr6k-30" edge="1" parent="1" source="fBxARoSI_EC12xjOjr6k-20" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#6c8ebf;strokeWidth=2;" target="fBxARoSI_EC12xjOjr6k-15" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fBxARoSI_EC12xjOjr6k-34" edge="1" parent="1" source="fBxARoSI_EC12xjOjr6k-15" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#d6b656;strokeWidth=3;fontSize=9;" target="fBxARoSI_EC12xjOjr6k-9" value="batch">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fBxARoSI_EC12xjOjr6k-35" edge="1" parent="1" source="fBxARoSI_EC12xjOjr6k-16" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#d6b656;strokeWidth=3;fontSize=9;" target="fBxARoSI_EC12xjOjr6k-9" value="batch">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fBxARoSI_EC12xjOjr6k-36" edge="1" parent="1" source="fBxARoSI_EC12xjOjr6k-17" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#d6b656;strokeWidth=3;fontSize=9;" target="fBxARoSI_EC12xjOjr6k-10" value="batch">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fBxARoSI_EC12xjOjr6k-37" edge="1" parent="1" source="fBxARoSI_EC12xjOjr6k-18" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#d6b656;strokeWidth=3;fontSize=9;" target="fBxARoSI_EC12xjOjr6k-11" value="batch">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fBxARoSI_EC12xjOjr6k-38" edge="1" parent="1" source="fBxARoSI_EC12xjOjr6k-12" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#d6b656;strokeWidth=3;fontSize=9;" target="fBxARoSI_EC12xjOjr6k-6" value="batch">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fBxARoSI_EC12xjOjr6k-39" edge="1" parent="1" source="fBxARoSI_EC12xjOjr6k-13" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#82b366;strokeWidth=3;fontSize=9;" target="fBxARoSI_EC12xjOjr6k-7" value="batch">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fBxARoSI_EC12xjOjr6k-40" edge="1" parent="1" source="fBxARoSI_EC12xjOjr6k-14" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#b85450;strokeWidth=3;fontSize=9;" target="fBxARoSI_EC12xjOjr6k-8" value="batch">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fBxARoSI_EC12xjOjr6k-41" edge="1" parent="1" source="fBxARoSI_EC12xjOjr6k-9" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#d6b656;strokeWidth=3;fontSize=9;" target="fBxARoSI_EC12xjOjr6k-5" value="batch">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fBxARoSI_EC12xjOjr6k-42" edge="1" parent="1" source="fBxARoSI_EC12xjOjr6k-10" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#d6b656;strokeWidth=3;fontSize=9;" target="fBxARoSI_EC12xjOjr6k-5" value="batch">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fBxARoSI_EC12xjOjr6k-43" edge="1" parent="1" source="fBxARoSI_EC12xjOjr6k-11" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#d6b656;strokeWidth=3;fontSize=9;" target="fBxARoSI_EC12xjOjr6k-5" value="batch">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fBxARoSI_EC12xjOjr6k-44" edge="1" parent="1" source="fBxARoSI_EC12xjOjr6k-5" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#d6b656;strokeWidth=4;fontSize=9;fontStyle=1;" target="fBxARoSI_EC12xjOjr6k-3" value="batch + alerts">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fBxARoSI_EC12xjOjr6k-45" edge="1" parent="1" source="fBxARoSI_EC12xjOjr6k-6" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#9673a6;strokeWidth=4;fontSize=9;fontStyle=1;" target="fBxARoSI_EC12xjOjr6k-3" value="batch + alerts">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fBxARoSI_EC12xjOjr6k-46" edge="1" parent="1" source="fBxARoSI_EC12xjOjr6k-7" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#82b366;strokeWidth=4;fontSize=9;fontStyle=1;" target="fBxARoSI_EC12xjOjr6k-3" value="batch + alerts">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fBxARoSI_EC12xjOjr6k-47" edge="1" parent="1" source="fBxARoSI_EC12xjOjr6k-8" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#b85450;strokeWidth=4;fontSize=9;fontStyle=1;" target="fBxARoSI_EC12xjOjr6k-3" value="batch + alerts">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fBxARoSI_EC12xjOjr6k-48" edge="1" parent="1" source="fBxARoSI_EC12xjOjr6k-3" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#d6b656;strokeWidth=2;fontSize=9;dashed=1;" target="fBxARoSI_EC12xjOjr6k-5" value="push down">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fBxARoSI_EC12xjOjr6k-49" edge="1" parent="1" source="fBxARoSI_EC12xjOjr6k-5" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#d6b656;strokeWidth=2;fontSize=9;dashed=1;" target="fBxARoSI_EC12xjOjr6k-9" value="push down">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fBxARoSI_EC12xjOjr6k-50" edge="1" parent="1" source="fBxARoSI_EC12xjOjr6k-9" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#d6b656;strokeWidth=2;fontSize=9;dashed=1;" target="fBxARoSI_EC12xjOjr6k-15" value="push down">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fBxARoSI_EC12xjOjr6k-51" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;align=left;" value="Solid arrows = Knowledge UP (batch)&#xa;Dashed arrows = Intelligence DOWN (event-driven)&#xa;↔ Emma pulls from Nexus on-demand mid-meeting&#xa;See Diagrams 3 &amp; 4: how Nexus works" vertex="1">
+          <mxGeometry height="120" width="200" x="2210" y="1012" as="geometry" />
+        </mxCell>
+        <mxCell id="Clshjpb8mSTH1wVLnIFo-2" edge="1" parent="1" style="endArrow=classic;html=1;rounded=0;entryX=0.75;entryY=1;entryDx=0;entryDy=0;edgeStyle=orthogonalEdgeStyle;fillColor=#0011FF;" target="fBxARoSI_EC12xjOjr6k-16" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <Array as="points">
+              <mxPoint x="1230" y="1853" />
+              <mxPoint x="1230" y="1777" />
+              <mxPoint x="920" y="1777" />
+            </Array>
+            <mxPoint x="1230" y="1850" as="sourcePoint" />
+            <mxPoint x="930" y="1630" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="EaDYBpvPzLX3AQcYX384-1" edge="1" parent="1" style="endArrow=classic;html=1;rounded=0;entryX=0.917;entryY=0.987;entryDx=0;entryDy=0;edgeStyle=orthogonalEdgeStyle;entryPerimeter=0;" target="fBxARoSI_EC12xjOjr6k-17" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <Array as="points">
+              <mxPoint x="1530" y="1850" />
+              <mxPoint x="1230" y="1850" />
+            </Array>
+            <mxPoint x="1530" y="1854" as="sourcePoint" />
+            <mxPoint x="1235.8" y="1690" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram name="Diagram 3 — Nexus Intelligence" id="GZHc5kiNY3D2ZJRcyNuq">
+    <mxGraphModel dx="1740" dy="818" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="story-box-d3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=3;fontSize=12;align=left;verticalAlign=top;spacingLeft=20;spacingRight=20;spacingTop=15;spacingBottom=15;" value="&lt;b style=&quot;font-size:14px;color:#8a6d00&quot;&gt;📖 HOW NEXUS WORKS — Batch Intelligence at the Commercial Card Level&lt;/b&gt;&lt;br&gt;&lt;br&gt;Every sprint cycle, Nexus runs in &lt;b&gt;batch mode&lt;/b&gt; across the cross-squad vector databases — accumulated from each squad Emma&#39;s session-end push (🟡 F13). No meetings required. No questions asked. Pure pattern matching over what every team is building, debating, and discarding.&lt;br&gt;&lt;br&gt;Two things Nexus surfaces automatically:&lt;br&gt;&lt;br&gt;&lt;b style=&quot;color:#995500&quot;&gt;⚠ SCENARIO A — Duplication caught early&lt;/b&gt;&lt;br&gt;Team B&#39;s PO drops &lt;i&gt;&quot;phone number validation&quot;&lt;/i&gt; into next sprint. Nexus reads the vector DBs and knows Team A shipped phone validation 2 sprints ago — already in production. Alert fires to both POs: &lt;b style=&quot;color:#553366&quot;&gt;&quot;Team B is about to rebuild what Team A already shipped. Align before sprint commit.&quot;&lt;/b&gt;&lt;br&gt;&lt;br&gt;&lt;b style=&quot;color:#995500&quot;&gt;⚠ SCENARIO B — Dependency surfaced before it bites&lt;/b&gt;&lt;br&gt;Team B is building merchant onboarding. Nexus subtly detects: this feature will need Team A&#39;s payment validator downstream — but Team A hasn&#39;t published the API contract yet. Alert fires to both POs: &lt;b style=&quot;color:#553366&quot;&gt;&quot;Team B has a hidden dependency on Team A&#39;s work. Align now, not in Sprint 4 when integration breaks.&quot;&lt;/b&gt;&lt;br&gt;&lt;br&gt;Both interventions happen &lt;b&gt;BEFORE damage is done&lt;/b&gt;. Multiply by 30 squads, 4 LOBs, every sprint cycle.&lt;br&gt;&lt;br&gt;Bidirectional Nexus (🟡 F13 session push feeds data in + 🟡 F7 live query serves it back) is the mechanism. The value lives in between — batch pattern detection that no individual team can see." vertex="1">
+          <mxGeometry height="460" width="1480" x="140" y="10" as="geometry" />
+        </mxCell>
+        <mxCell id="Hj2W5uPPpjN2sFp9lBE7-29" edge="1" parent="1" source="Hj2W5uPPpjN2sFp9lBE7-14" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#9673a6;strokeWidth=2;fontSize=9;dashed=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" target="Hj2W5uPPpjN2sFp9lBE7-4" value="F9: push back to Squad 5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Hj2W5uPPpjN2sFp9lBE7-24" edge="1" parent="1" source="Hj2W5uPPpjN2sFp9lBE7-7" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#d6b656;strokeWidth=2;exitX=0.8;exitY=1;exitDx=0;exitDy=0;" target="Hj2W5uPPpjN2sFp9lBE7-11" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Hj2W5uPPpjN2sFp9lBE7-23" edge="1" parent="1" source="Hj2W5uPPpjN2sFp9lBE7-7" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#d6b656;strokeWidth=2;exitX=0.6;exitY=1;exitDx=0;exitDy=0;" target="Hj2W5uPPpjN2sFp9lBE7-10" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Hj2W5uPPpjN2sFp9lBE7-22" edge="1" parent="1" source="Hj2W5uPPpjN2sFp9lBE7-7" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#d6b656;strokeWidth=2;exitX=0.4;exitY=1;exitDx=0;exitDy=0;" target="Hj2W5uPPpjN2sFp9lBE7-9" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Hj2W5uPPpjN2sFp9lBE7-19" edge="1" parent="1" source="Hj2W5uPPpjN2sFp9lBE7-5" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#6c8ebf;strokeWidth=2;fontSize=9;exitX=1;exitY=0.3;exitDx=0;exitDy=0;" target="Hj2W5uPPpjN2sFp9lBE7-7" value="F3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Hj2W5uPPpjN2sFp9lBE7-20" edge="1" parent="1" source="Hj2W5uPPpjN2sFp9lBE7-6" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#6c8ebf;strokeWidth=2;fontSize=9;exitX=1.013;exitY=0.617;exitDx=0;exitDy=0;exitPerimeter=0;" value="F4">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="500" y="950" as="sourcePoint" />
+            <mxPoint x="1050" y="363" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Hj2W5uPPpjN2sFp9lBE7-1" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=18;fontStyle=1;fontColor=#1a1a2e;" value="Commercial Card NEXUS — Cross-Squad Intelligence" vertex="1">
+          <mxGeometry height="28" width="900" x="620" y="250" as="geometry" />
+        </mxCell>
+        <mxCell id="Hj2W5uPPpjN2sFp9lBE7-2" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=10;fontStyle=2;fontColor=#666666;" value="How Nexus detects duplication, dependency and discarded decisions across squads — before damage is done" vertex="1">
+          <mxGeometry height="16" width="1100" x="520" y="294" as="geometry" />
+        </mxCell>
+        <mxCell id="Hj2W5uPPpjN2sFp9lBE7-3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;align=left;" value="Emma — Squad 1&#xa;Payment Gateway&#xa;&#xa;built: phone validator&#xa;handles: intl formats&#xa;outcome: in production 6w&#xa;discarded: open-source lib (slow)" vertex="1">
+          <mxGeometry height="150" width="230" x="140" y="318" as="geometry" />
+        </mxCell>
+        <mxCell id="Hj2W5uPPpjN2sFp9lBE7-4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;align=left;" value="Emma — Squad 5&#xa;Merchant Onboarding&#xa;&#xa;need: phone validation&#xa;approach: about to build&#xa;status: about to duplicate&#xa;Squad 1&#39;s work" vertex="1">
+          <mxGeometry height="150" width="230" x="140" y="518" as="geometry" />
+        </mxCell>
+        <mxCell id="Hj2W5uPPpjN2sFp9lBE7-5" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;align=left;" value="Emma — Squad 12&#xa;Fraud Detection&#xa;&#xa;need: validate caller numbers&#xa;depends on: phone validator&#xa;status: blocked&#xa;Squad 1 hasn&#39;t docs&#39;d it yet" vertex="1">
+          <mxGeometry height="150" width="230" x="140" y="718" as="geometry" />
+        </mxCell>
+        <mxCell id="Hj2W5uPPpjN2sFp9lBE7-6" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;fontStyle=2;" value="Emma — Squads 2-4, 6-11, 13-30&#xa;All feeding tagged knowledge objects to Nexus" vertex="1">
+          <mxGeometry height="60" width="230" x="140" y="918" as="geometry" />
+        </mxCell>
+        <mxCell id="Hj2W5uPPpjN2sFp9lBE7-7" parent="1" style="shape=datastore;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=10;" value="D4: Cross-Squad Knowledge Store  ·  Qdrant  ·  All 30 Emmas feed in  ·  problem · constraint · discarded · outcome · squad · sprint · date · confidence" vertex="1">
+          <mxGeometry height="55" width="960" x="440" y="308" as="geometry" />
+        </mxCell>
+        <mxCell id="Hj2W5uPPpjN2sFp9lBE7-8" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;align=left;" value="N2. Duplication Detection  —  Frontier LLM&#xa;&#xa;Squad 5 about to build phone number validation.&#xa;Squad 1 already built one 2 sprints ago — in production.&#xa;Same problem, same solution, two teams, no awareness.&#xa;&#xa;Alert fired immediately: Squad 1 PO + Squad 5 PO notified." vertex="1">
+          <mxGeometry height="130" width="540" x="440" y="418" as="geometry" />
+        </mxCell>
+        <mxCell id="Hj2W5uPPpjN2sFp9lBE7-9" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;align=left;" value="N3. Dependency Mapping  —  Frontier LLM&#xa;&#xa;Squad 12 needs phone validation for fraud alerts.&#xa;Depends on Squad 1&#39;s validator — but it&#39;s undocumented.&#xa;Squad 12 is blocked, doesn&#39;t know who to ask.&#xa;&#xa;Alert fired: Squad 12 PO + Squad 1 PO + Programme Manager.&#xa;Recommendation: docs + alignment before Sprint 4." vertex="1">
+          <mxGeometry height="130" width="540" x="440" y="578" as="geometry" />
+        </mxCell>
+        <mxCell id="Hj2W5uPPpjN2sFp9lBE7-10" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;align=left;" value="N4. Discarded Decision Tracking  —  Frontier LLM&#xa;&#xa;Squad 5 about to add an open-source phone validation library.&#xa;Nexus knows Squad 1 tried that — too slow at scale.&#xa;&#xa;Squad 5&#39;s Emma pulls from Nexus mid-meeting (F7) and gets:&#xa;Squad 1 tried that lib. Too slow. Use their custom one. Saves you a week." vertex="1">
+          <mxGeometry height="130" width="540" x="440" y="738" as="geometry" />
+        </mxCell>
+        <mxCell id="Hj2W5uPPpjN2sFp9lBE7-11" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;align=left;" value="N5. Constraint Resolution Monitoring  —  Frontier LLM&#xa;&#xa;Squad 1 added support for new country codes in Sprint 3.&#xa;Nexus auto-identifies all squads using their validator.&#xa;&#xa;Broadcast: Squad 5 · Squad 12 · Squad 18&#xa;Validator now supports new countries. Pull latest. No code change needed." vertex="1">
+          <mxGeometry height="130" width="540" x="440" y="898" as="geometry" />
+        </mxCell>
+        <mxCell id="Hj2W5uPPpjN2sFp9lBE7-12" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;fontStyle=1;" value="PO Alert&#xa;Squad 1 + Squad 5&#xa;&#xa;Duplication detected.&#xa;Squad 5 about to rebuild&#xa;Squad 1&#39;s validator.&#xa;Align before sprint commit." vertex="1">
+          <mxGeometry height="130" width="200" x="1120" y="418" as="geometry" />
+        </mxCell>
+        <mxCell id="Hj2W5uPPpjN2sFp9lBE7-13" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;fontStyle=1;" value="Dependency Alert&#xa;Squad 12 + Squad 1&#xa;+ Programme Manager&#xa;&#xa;Squad 12 blocked.&#xa;Needs Squad 1 docs.&#xa;Schedule alignment." vertex="1">
+          <mxGeometry height="130" width="200" x="1120" y="578" as="geometry" />
+        </mxCell>
+        <mxCell id="Hj2W5uPPpjN2sFp9lBE7-14" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;fontStyle=1;" value="Live Pull by Squad 5&#xa;Emma mid-meeting (F7)&#xa;&#xa;Squad 1 already built this.&#xa;Use their validator.&#xa;/core/validators/phone&#xa;Saves you ~1 week." vertex="1">
+          <mxGeometry height="130" width="200" x="1120" y="738" as="geometry" />
+        </mxCell>
+        <mxCell id="Hj2W5uPPpjN2sFp9lBE7-15" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" value="Broadcast&#xa;Squad 5 · 12 · 18&#xa;&#xa;New country codes added.&#xa;Squad 1 validator updated.&#xa;Pull latest. No change&#xa;needed in your code." vertex="1">
+          <mxGeometry height="130" width="200" x="1120" y="898" as="geometry" />
+        </mxCell>
+        <mxCell id="Hj2W5uPPpjN2sFp9lBE7-16" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;fontStyle=1;" value="PAYMENTS NEXUS&#xa;&#xa;Patterns fed upward.&#xa;Phone validator pattern&#xa;propagates to Trades&#xa;+ other sub-LOBs." vertex="1">
+          <mxGeometry height="130" width="200" x="1420" y="308" as="geometry" />
+        </mxCell>
+        <mxCell id="Hj2W5uPPpjN2sFp9lBE7-17" edge="1" parent="1" source="Hj2W5uPPpjN2sFp9lBE7-3" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#6c8ebf;strokeWidth=2;fontSize=9;exitX=1;exitY=0.3;exitDx=0;exitDy=0;" target="Hj2W5uPPpjN2sFp9lBE7-7" value="F1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Hj2W5uPPpjN2sFp9lBE7-18" edge="1" parent="1" source="Hj2W5uPPpjN2sFp9lBE7-4" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#6c8ebf;strokeWidth=2;fontSize=9;exitX=1;exitY=0.3;exitDx=0;exitDy=0;" target="Hj2W5uPPpjN2sFp9lBE7-7" value="F2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Hj2W5uPPpjN2sFp9lBE7-21" edge="1" parent="1" source="Hj2W5uPPpjN2sFp9lBE7-7" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#d6b656;strokeWidth=2;exitX=0.2;exitY=1;exitDx=0;exitDy=0;" target="Hj2W5uPPpjN2sFp9lBE7-8" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Hj2W5uPPpjN2sFp9lBE7-25" edge="1" parent="1" source="Hj2W5uPPpjN2sFp9lBE7-8" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#b85450;strokeWidth=2;fontSize=9;" target="Hj2W5uPPpjN2sFp9lBE7-12" value="F5: alert">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Hj2W5uPPpjN2sFp9lBE7-26" edge="1" parent="1" source="Hj2W5uPPpjN2sFp9lBE7-9" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#b85450;strokeWidth=2;fontSize=9;" target="Hj2W5uPPpjN2sFp9lBE7-13" value="F6: alert">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Hj2W5uPPpjN2sFp9lBE7-27" edge="1" parent="1" source="Hj2W5uPPpjN2sFp9lBE7-10" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#9673a6;strokeWidth=2;fontSize=9;" target="Hj2W5uPPpjN2sFp9lBE7-14" value="F7: served on pull">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Hj2W5uPPpjN2sFp9lBE7-28" edge="1" parent="1" source="Hj2W5uPPpjN2sFp9lBE7-11" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#82b366;strokeWidth=2;fontSize=9;" target="Hj2W5uPPpjN2sFp9lBE7-15" value="F8: broadcast">
+          <mxGeometry relative="1" x="0.1429" y="-7" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Hj2W5uPPpjN2sFp9lBE7-30" edge="1" parent="1" source="Hj2W5uPPpjN2sFp9lBE7-15" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#82b366;strokeWidth=2;fontSize=9;dashed=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" target="Hj2W5uPPpjN2sFp9lBE7-5" value="F10: resolved constraint">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Hj2W5uPPpjN2sFp9lBE7-31" edge="1" parent="1" source="Hj2W5uPPpjN2sFp9lBE7-7" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#d6b656;strokeWidth=3;fontSize=9;fontStyle=1;" target="Hj2W5uPPpjN2sFp9lBE7-16" value="F11: batch upward">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Hj2W5uPPpjN2sFp9lBE7-32" parent="1" style="text;html=1;strokeColor=#d6b656;fillColor=#fff2cc;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontSize=10;fontStyle=2;" value="This pattern repeats at every level — Payments Nexus, CIB Nexus, Enterprise Nexus. Same intelligence. Wider scope each time." vertex="1">
+          <mxGeometry height="35" width="1480" x="140" y="1098" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram name="Diagram 4 — Nexus Architecture" id="Ygw4_5_Jmmb41iqVzUEH">
+    <mxGraphModel dx="2361" dy="1110" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1920" pageHeight="1200" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="d4-title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=22;fontStyle=1;fontColor=#1a1a2e;" value="Nexus — How It Works Internally" vertex="1">
+          <mxGeometry height="35" width="1840" x="40" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="d4-subtitle" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=12;fontStyle=2;fontColor=#666666;" value="Batch + on-demand query architecture · same pattern repeats at every level (Commercial Card → Payments → CIB → Enterprise)" vertex="1">
+          <mxGeometry height="22" width="1840" x="40" y="58" as="geometry" />
+        </mxCell>
+        <mxCell id="d4-input-band" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2;" value="" vertex="1">
+          <mxGeometry height="120" width="1840" x="40" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="d4-input-label" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=13;fontStyle=1;fontColor=#1a5490;" value="📥 INPUT — Squad Emmas push structured knowledge at session end (F13 from Diagram 1)" vertex="1">
+          <mxGeometry height="22" width="1840" x="40" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="d4-emma1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=11;" value="🎙 Squad 1 Emma&#xa;F13 push at session end" vertex="1">
+          <mxGeometry height="60" width="240" x="120" y="155" as="geometry" />
+        </mxCell>
+        <mxCell id="d4-emma2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=11;" value="🎙 Squad 2 Emma&#xa;F13 push at session end" vertex="1">
+          <mxGeometry height="60" width="240" x="430" y="155" as="geometry" />
+        </mxCell>
+        <mxCell id="d4-emma3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=11;" value="🎙 Squad 3 Emma&#xa;F13 push at session end" vertex="1">
+          <mxGeometry height="60" width="240" x="740" y="155" as="geometry" />
+        </mxCell>
+        <mxCell id="d4-emmadots" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=11;fontStyle=2;fontColor=#666666;" value="… (all 30 squad Emmas)" vertex="1">
+          <mxGeometry height="30" width="280" x="1050" y="170" as="geometry" />
+        </mxCell>
+        <mxCell id="d4-store" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=3;fontSize=12;fontStyle=1;" value="🗄 Cross-Squad Knowledge Store&#xa;Vector DB (Qdrant / OpenSearch)&#xa;Decisions · Constraints · Discarded · Outcomes&#xa;Tagged with squad · sprint · date · confidence" vertex="1">
+          <mxGeometry height="140" width="520" x="700" y="320" as="geometry" />
+        </mxCell>
+        <mxCell id="d4-store-edge1" edge="1" parent="1" source="d4-emma1" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#6c8ebf;strokeWidth=2;endArrow=classic;" target="d4-store" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="d4-store-edge2" edge="1" parent="1" source="d4-emma2" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#6c8ebf;strokeWidth=2;endArrow=classic;" target="d4-store" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="d4-store-edge3" edge="1" parent="1" source="d4-emma3" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#6c8ebf;strokeWidth=2;endArrow=classic;" target="d4-store" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="d4-batch-zone" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff0e6;strokeColor=#d79b00;strokeWidth=2;" value="" vertex="1">
+          <mxGeometry height="380" width="900" x="40" y="510" as="geometry" />
+        </mxCell>
+        <mxCell id="d4-batch-title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=14;fontStyle=1;fontColor=#995500;" value="🌙 BATCH MODE — runs on schedule (nightly / sprint cadence)" vertex="1">
+          <mxGeometry height="25" width="900" x="40" y="525" as="geometry" />
+        </mxCell>
+        <mxCell id="d4-batch-trigger" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=11;fontStyle=1;" value="&amp;nbsp;Scheduled Trigger&lt;br&gt;e.g. nightly 2am" vertex="1">
+          <mxGeometry height="60" width="220" x="80" y="580" as="geometry" />
+        </mxCell>
+        <mxCell id="d4-batch-llm" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=2;fontSize=11;fontStyle=1;" value="&amp;nbsp;Frontier LLM&lt;br&gt;(Bedrock)&lt;br&gt;Pattern detection across&lt;br&gt;all squad knowledge" vertex="1">
+          <mxGeometry height="100" width="240" x="350" y="580" as="geometry" />
+        </mxCell>
+        <mxCell id="d4-batch-output" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;fontStyle=1;" value="&amp;nbsp;PO Alerts&lt;br&gt;Async notifications:&lt;br&gt;duplication · dependency&lt;br&gt;Email · dashboard" vertex="1">
+          <mxGeometry height="100" width="240" x="640" y="580" as="geometry" />
+        </mxCell>
+        <mxCell id="d4-batch-flow1" edge="1" parent="1" source="d4-batch-trigger" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#d79b00;strokeWidth=2;fontSize=10;endArrow=classic;" target="d4-batch-llm" value="trigger">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="d4-batch-flow2" edge="1" parent="1" source="d4-batch-llm" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#d79b00;strokeWidth=2;fontSize=10;endArrow=classic;" target="d4-batch-output" value="alerts">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="d4-batch-store-read" edge="1" parent="1" source="d4-store" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#d6b656;strokeWidth=2;fontSize=10;dashed=1;endArrow=classic;" target="d4-batch-llm" value="reads cross-squad data">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="d4-batch-note" parent="1" style="text;html=1;strokeColor=none;fillColor=#fffbf0;align=left;fontSize=11;fontStyle=2;fontColor=#666666;spacingLeft=15;spacingRight=15;spacingTop=10;spacingBottom=10;rounded=1;" value="Batch mode finds patterns no individual squad can see — duplication across teams, hidden dependencies, repeated discarded approaches. Fires alerts to POs BEFORE damage is done." vertex="1">
+          <mxGeometry height="80" width="860" x="60" y="720" as="geometry" />
+        </mxCell>
+        <mxCell id="d4-query-zone" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f4f8;strokeColor=#6c8ebf;strokeWidth=2;" value="" vertex="1">
+          <mxGeometry height="380" width="900" x="980" y="510" as="geometry" />
+        </mxCell>
+        <mxCell id="d4-query-title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=14;fontStyle=1;fontColor=#1a5490;" value="⚡ QUERY MODE — on-demand when an Emma calls F7 mid-session" vertex="1">
+          <mxGeometry height="25" width="900" x="980" y="525" as="geometry" />
+        </mxCell>
+        <mxCell id="d4-query-trigger" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;fontStyle=1;" value="&amp;nbsp;F7 Pull from Emma&lt;br&gt;Mid-session query&lt;br&gt;e.g. &quot;phone validation?&quot;" vertex="1">
+          <mxGeometry height="80" width="220" x="1020" y="580" as="geometry" />
+        </mxCell>
+        <mxCell id="d4-query-llm" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=2;fontSize=11;fontStyle=1;" value="&amp;nbsp;Frontier LLM&lt;br&gt;(Bedrock)&lt;br&gt;Retrieves + reasons over&lt;br&gt;cross-squad knowledge" vertex="1">
+          <mxGeometry height="100" width="240" x="1290" y="580" as="geometry" />
+        </mxCell>
+        <mxCell id="d4-query-output" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;fontStyle=1;" value="&amp;nbsp;Live Response to Emma&lt;br&gt;&quot;Squad 1 already built this.&quot;&lt;br&gt;~2-3 seconds round trip" vertex="1">
+          <mxGeometry height="100" width="240" x="1580" y="580" as="geometry" />
+        </mxCell>
+        <mxCell id="d4-query-flow1" edge="1" parent="1" source="d4-query-trigger" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#6c8ebf;strokeWidth=2;fontSize=10;endArrow=classic;" target="d4-query-llm" value="query">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="d4-query-flow2" edge="1" parent="1" source="d4-query-llm" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#82b366;strokeWidth=2;fontSize=10;endArrow=classic;" target="d4-query-output" value="response">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="d4-query-store-read" edge="1" parent="1" source="d4-store" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#d6b656;strokeWidth=2;fontSize=10;dashed=1;endArrow=classic;" target="d4-query-llm" value="reads cross-squad data">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="d4-query-note" parent="1" style="text;html=1;strokeColor=none;fillColor=#f0f8ff;align=left;fontSize=11;fontStyle=2;fontColor=#666666;spacingLeft=15;spacingRight=15;spacingTop=10;spacingBottom=10;rounded=1;" value="Query mode answers Emma&#39;s F7 pull during a live call. Sub-second to ~2-3 seconds round trip is fast enough that Emma bridges naturally &lt;br&gt;&lt;span style=&quot;white-space: pre;&quot;&gt;&#x9;&lt;/span&gt;&lt;span style=&quot;white-space: pre;&quot;&gt;&#x9;&lt;/span&gt;&lt;span style=&quot;white-space: pre;&quot;&gt;&#x9;&lt;/span&gt;&lt;span style=&quot;white-space: pre;&quot;&gt;&#x9;&lt;/span&gt;&lt;span style=&quot;white-space: pre;&quot;&gt;&#x9;&lt;/span&gt;&lt;span style=&quot;white-space: pre;&quot;&gt;&#x9;&lt;/span&gt;&lt;span style=&quot;white-space: pre;&quot;&gt;&#x9;&lt;/span&gt;&lt;span style=&quot;white-space: pre;&quot;&gt;&#x9;&lt;/span&gt;&lt;span style=&quot;white-space: pre;&quot;&gt;&#x9;&lt;/span&gt;&quot;let me check across teams&quot; → answer." vertex="1">
+          <mxGeometry height="80" width="860" x="1000" y="720" as="geometry" />
+        </mxCell>
+        <mxCell id="d4-idle-note" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#999999;strokeWidth=2;fontSize=12;align=left;verticalAlign=middle;spacingLeft=25;spacingRight=25;spacingTop=15;spacingBottom=15;fontStyle=2;fontColor=#444444;" value="IDLE - when neither batch nor query is running, Nexus consumes zero compute. The cross-squad knowledge store stays available; the LLM service spins down. This is a serverless, pay-per-use architecture&amp;nbsp; no provisioned capacity, no minimum commitment." vertex="1">
+          <mxGeometry height="80" width="1840" x="40" y="920" as="geometry" />
+        </mxCell>
+        <mxCell id="d4-pattern-note" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffbf0;strokeColor=#d6b656;strokeWidth=2;fontSize=12;align=left;verticalAlign=middle;spacingLeft=25;spacingRight=25;spacingTop=15;spacingBottom=15;fontStyle=2;fontColor=#666666;" value="SAME PATTERN AT EVERY LEVEL - Commercial Card Nexus rolls up to Payments Nexus → CIB Nexus → Enterprise Nexus. Each level uses the same architecture (batch + query + idle), just over wider scope of accumulated knowledge. See Diagram 2 for the hierarchy." vertex="1">
+          <mxGeometry height="80" width="1840" x="50" y="1030" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
